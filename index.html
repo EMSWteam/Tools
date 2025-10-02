@@ -71,46 +71,69 @@
             </p>
         </header>
 
-        <!-- Main Content Grid (Two-Column Layout on larger screens) -->
-        <div class="grid lg:grid-cols-4 gap-8">
+        <!-- Main Content Grid (Changed to single column on all screens, forcing cards to fill width) -->
+        <!-- The main grid now is a standard layout on large screens -->
+        <div class="grid grid-cols-1 gap-8">
             
-            <!-- Column 1: Script Macros File List (Only visible on medium/large screens) -->
-            <div class="hidden lg:block lg:col-span-1 p-4 rounded-xl bg-slate-800/50 border border-slate-700 h-fit">
+            <!-- Fallback for small screens: Script Macros at the top now, for consistent visual flow -->
+            <div class="lg:hidden col-span-1 p-4 rounded-xl bg-slate-800/50 border border-slate-700">
                 <h3 class="text-xl font-semibold text-amber-400 mb-4 flex items-center">
                     <i data-lucide="code" class="w-6 h-6 mr-2"></i>
                     Script Macros
                 </h3>
-                
-                <div class="space-y-2">
-                    
-                    <!-- File 1: a.js with explicit button -->
+                <div class="space-y-3">
+                    <!-- File 1: EMS3 + Limit + Nbr.js -->
                     <div class="file-row flex items-center justify-between p-2 rounded-lg">
-                        <span class="text-slate-300 text-base font-mono">1. a.js</span>
-                        <a href="a.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
+                        <span class="text-slate-300 text-base font-mono">1. EMS3 + Limit + Nbr.js</span>
+                        <a href="EMS3 + Limit + Nbr.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
                             <i data-lucide="download" class="w-4 h-4 mr-1"></i>
                             Download
                         </a>
                     </div>
-                    
-                    <!-- File 2: b.js with explicit button -->
+                    <!-- File 2: EMS6 + Limit6 + Nbr6.js -->
                     <div class="file-row flex items-center justify-between p-2 rounded-lg">
-                        <span class="text-slate-300 text-base font-mono">2. b.js</span>
-                        <a href="b.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
+                        <span class="text-slate-300 text-base font-mono">2. EMS6 + Limit6 + Nbr6.js</span>
+                        <a href="EMS6 + Limit6 + Nbr6.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
                             <i data-lucide="download" class="w-4 h-4 mr-1"></i>
                             Download
                         </a>
                     </div>
-                    
-                    <!-- Optional hint -->
-                    <p class="text-xs text-slate-500 pt-2 border-t border-slate-700 mt-4">
-                        (Click the download button to save the file.)
-                    </p>
+                    <!-- File 3: IPS - EMS3.js -->
+                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
+                        <span class="text-slate-300 text-base font-mono">3. IPS - EMS3.js</span>
+                        <a href="IPS - EMS3.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
+                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                            Download
+                        </a>
+                    </div>
+                    <!-- File 4: IPS - EMS6.js -->
+                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
+                        <span class="text-slate-300 text-base font-mono">4. IPS - EMS6.js</span>
+                        <a href="IPS - EMS6.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
+                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                            Download
+                        </a>
+                    </div>
+                    <!-- File 5: Selenium.js -->
+                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
+                        <span class="text-slate-300 text-base font-mono">5. Selenium.js</span>
+                        <a href="Selenium.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
+                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                            Download
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <!-- Column 2: Main Shortcut Cards (Takes up 3/4 of the width on large screens) -->
-            <div class="col-span-1 lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-
+            <!-- Shortcut Cards Container (Takes full width on all screens) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!--
+                    I am removing the lg:col-span-3 wrapper and the unnecessary inner column container.
+                    The shortcut cards now span the full width of the main content area.
+                    On large screens, they are organized in 4 columns (lg:grid-cols-4).
+                    On small screens, they are organized in 1 or 2 columns (grid-cols-1 sm:grid-cols-2).
+                -->
+                
                 <!-- Shortcut 1: Task EMS3-4-6 + Night.html (Blue) -->
                 <a href="Task EMS3-4-6 + Night.html" class="shortcut-card block p-8 rounded-2xl border border-slate-700 bg-slate-800/70 text-white hover:bg-slate-700/80 focus:outline-none focus:ring-4 focus:ring-blue-500/50 shadow-xl" aria-label="Go to Task EMS3-4-6 Night Mode">
                     <div class="flex flex-col items-start space-y-4">
@@ -164,33 +187,87 @@
                         </span>
                     </div>
                 </a>
+                
+                <!-- Add a fourth placeholder card to demonstrate the new 4-column layout capability on large screens -->
+                <a href="#" class="shortcut-card block p-8 rounded-2xl border border-slate-700 bg-slate-800/70 text-white hover:bg-slate-700/80 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 shadow-xl" aria-label="Placeholder Tool">
+                    <div class="flex flex-col items-start space-y-4">
+                        <div class="p-4 bg-indigo-500 rounded-full text-white shadow-lg shadow-indigo-500/30">
+                            <!-- Icon for Placeholder -->
+                            <i data-lucide="wrench" class="w-8 h-8"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold">New Utility</h2>
+                        <p class="text-slate-400 text-lg">
+                            A placeholder card to show the expanded 4-column layout on large monitors.
+                        </p>
+                        <span class="text-indigo-400 font-semibold flex items-center mt-4">
+                            Launch Tool
+                            <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                        </span>
+                    </div>
+                </a>
             </div>
             
-            <!-- Fallback for small screens: Script Macros at the bottom -->
-            <div class="lg:hidden col-span-1 mt-8 p-4 rounded-xl bg-slate-800/50 border border-slate-700">
+            <!-- Column 1: Script Macros File List (Moved to the bottom for large screens, made explicit on lg screens) -->
+            <div class="hidden lg:block col-span-1 p-4 rounded-xl bg-slate-800/50 border border-slate-700 h-fit">
                 <h3 class="text-xl font-semibold text-amber-400 mb-4 flex items-center">
                     <i data-lucide="code" class="w-6 h-6 mr-2"></i>
                     Script Macros
                 </h3>
-                <div class="space-y-3">
-                    <!-- File 1: a.js with explicit button -->
+                
+                <div class="space-y-2">
+                    
+                    <!-- File 1: EMS3 + Limit + Nbr.js -->
                     <div class="file-row flex items-center justify-between p-2 rounded-lg">
-                        <span class="text-slate-300 text-base font-mono">1. a.js</span>
-                        <a href="a.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
+                        <span class="text-slate-300 text-base font-mono">1. EMS3 + Limit + Nbr.js</span>
+                        <a href="EMS3 + Limit + Nbr.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
                             <i data-lucide="download" class="w-4 h-4 mr-1"></i>
                             Download
                         </a>
                     </div>
-                    <!-- File 2: b.js with explicit button -->
+                    
+                    <!-- File 2: EMS6 + Limit6 + Nbr6.js -->
                     <div class="file-row flex items-center justify-between p-2 rounded-lg">
-                        <span class="text-slate-300 text-base font-mono">2. b.js</span>
-                        <a href="b.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
+                        <span class="text-slate-300 text-base font-mono">2. EMS6 + Limit6 + Nbr6.js</span>
+                        <a href="EMS6 + Limit6 + Nbr6.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
                             <i data-lucide="download" class="w-4 h-4 mr-1"></i>
                             Download
                         </a>
                     </div>
+
+                    <!-- File 3: IPS - EMS3.js -->
+                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
+                        <span class="text-slate-300 text-base font-mono">3. IPS - EMS3.js</span>
+                        <a href="IPS - EMS3.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
+                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                            Download
+                        </a>
+                    </div>
+                    
+                    <!-- File 4: IPS - EMS6.js -->
+                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
+                        <span class="text-slate-300 text-base font-mono">4. IPS - EMS6.js</span>
+                        <a href="IPS - EMS6.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
+                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                            Download
+                        </a>
+                    </div>
+
+                    <!-- File 5: Selenium.js -->
+                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
+                        <span class="text-slate-300 text-base font-mono">5. Selenium.js</span>
+                        <a href="Selenium.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
+                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                            Download
+                        </a>
+                    </div>
+                    
+                    <!-- Optional hint -->
+                    <p class="text-xs text-slate-500 pt-2 border-t border-slate-700 mt-4">
+                        (Click the download button to save the file.)
+                    </p>
                 </div>
             </div>
+
         </div>
 
         <!-- Footer Note -->
