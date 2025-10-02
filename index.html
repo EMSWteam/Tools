@@ -71,11 +71,10 @@
             </p>
         </header>
 
-        <!-- Main Content Grid (Changed to single column on all screens, forcing cards to fill width) -->
-        <!-- The main grid now is a standard layout on large screens -->
+        <!-- Main Content Grid (Single column layout to accommodate full-width cards) -->
         <div class="grid grid-cols-1 gap-8">
             
-            <!-- Fallback for small screens: Script Macros at the top now, for consistent visual flow -->
+            <!-- Fallback for small screens: Script Macros at the top -->
             <div class="lg:hidden col-span-1 p-4 rounded-xl bg-slate-800/50 border border-slate-700">
                 <h3 class="text-xl font-semibold text-amber-400 mb-4 flex items-center">
                     <i data-lucide="code" class="w-6 h-6 mr-2"></i>
@@ -127,12 +126,6 @@
 
             <!-- Shortcut Cards Container (Takes full width on all screens) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!--
-                    I am removing the lg:col-span-3 wrapper and the unnecessary inner column container.
-                    The shortcut cards now span the full width of the main content area.
-                    On large screens, they are organized in 4 columns (lg:grid-cols-4).
-                    On small screens, they are organized in 1 or 2 columns (grid-cols-1 sm:grid-cols-2).
-                -->
                 
                 <!-- Shortcut 1: Task EMS3-4-6 + Night.html (Blue) -->
                 <a href="Task EMS3-4-6 + Night.html" class="shortcut-card block p-8 rounded-2xl border border-slate-700 bg-slate-800/70 text-white hover:bg-slate-700/80 focus:outline-none focus:ring-4 focus:ring-blue-500/50 shadow-xl" aria-label="Go to Task EMS3-4-6 Night Mode">
@@ -188,18 +181,18 @@
                     </div>
                 </a>
                 
-                <!-- Add a fourth placeholder card to demonstrate the new 4-column layout capability on large screens -->
-                <a href="#" class="shortcut-card block p-8 rounded-2xl border border-slate-700 bg-slate-800/70 text-white hover:bg-slate-700/80 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 shadow-xl" aria-label="Placeholder Tool">
+                <!-- NEW Shortcut 4: Gmail Filter.html (Red) -->
+                <a href="Gmail Filter.html" class="shortcut-card block p-8 rounded-2xl border border-slate-700 bg-slate-800/70 text-white hover:bg-slate-700/80 focus:outline-none focus:ring-4 focus:ring-red-500/50 shadow-xl" aria-label="Go to Gmail Filter Tool">
                     <div class="flex flex-col items-start space-y-4">
-                        <div class="p-4 bg-indigo-500 rounded-full text-white shadow-lg shadow-indigo-500/30">
-                            <!-- Icon for Placeholder -->
-                            <i data-lucide="wrench" class="w-8 h-8"></i>
+                        <div class="p-4 bg-red-500 rounded-full text-white shadow-lg shadow-red-500/30">
+                            <!-- Icon for Filter/Settings -->
+                            <i data-lucide="settings-2" class="w-8 h-8"></i>
                         </div>
-                        <h2 class="text-3xl font-bold">New Utility</h2>
+                        <h2 class="text-3xl font-bold">Gmail Filter</h2>
                         <p class="text-slate-400 text-lg">
-                            A placeholder card to show the expanded 4-column layout on large monitors.
+                            Generate and manage complex email filters for automatic sorting and organization.
                         </p>
-                        <span class="text-indigo-400 font-semibold flex items-center mt-4">
+                        <span class="text-red-400 font-semibold flex items-center mt-4">
                             Launch Tool
                             <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
                         </span>
@@ -207,7 +200,7 @@
                 </a>
             </div>
             
-            <!-- Column 1: Script Macros File List (Moved to the bottom for large screens, made explicit on lg screens) -->
+            <!-- Script Macros File List (For large screens, placed near the bottom for consistency) -->
             <div class="hidden lg:block col-span-1 p-4 rounded-xl bg-slate-800/50 border border-slate-700 h-fit">
                 <h3 class="text-xl font-semibold text-amber-400 mb-4 flex items-center">
                     <i data-lucide="code" class="w-6 h-6 mr-2"></i>
