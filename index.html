@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SouFiane Tools</title>
+  <link rel="icon" href="https://i.ytimg.com/an/EQGgjL7Zkou4zjA7X-USYw/featured_channel.jpg" />
+  <style>
+    /* General body styling */
+    body {
+      margin: 0;
+      font-family: montserrat, sans-serif;
+      font-weight: bold;
+      font-size: 12px;
+      color: white;
+      background-color: #1f2d3d;
+      display: flex;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background pattern for the body */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url('https://www.transparenttextures.com/patterns/arabesque.png');
+      filter: invert(1);
+      z-index: -1;
+    }
+
+    /* Login container styling */
+    .login-container {
+      background-color: #1f2d3d70;
+      backdrop-filter: blur(2px);
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      width: 300px;
+      text-align: center;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      z-index: 10;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+
+    .login-container.hidden {
+      transform: translate(-50%, -50%) scale(0.5);
+      opacity: 0;
+      pointer-events: none; /* Prevent interaction during animation */
+    }
+
+    .login-container h2 {
+      margin: 0 0 20px;
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+      background-color: #37495c;
+      color: white;
+      font-size: 14px;
+    }
+
+    .login-container input::placeholder {
+      color: #b0bec5;
+    }
+
+    .login-container button {
+      width: 20%;
+      padding: 10px;
+      font-family: montserrat, sans-serif;
+      font-weight: 500;
+      border: none;
+      border-radius: 5px;
+      background-color: #4c59af;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .login-container button:hover {
+      background-color: #5a67d8;
+    }
+
+    .error-message {
+      color: crimson;
+      font-size: 12px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* Styling for the sidebar */
+    .sidebar {
+      position: relative;
+      background-color: #1f2d3d70;
+      backdrop-filter: blur(2px);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      width: 160px;
+      transform: translateX(-100%);
+      opacity: 0;
+      transition: transform 0.5s ease, opacity 0.5s ease, width 0.3s ease;
+    }
+
+    .sidebar.visible {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .sidebar.hidden {
+      display: none; /* Ensure hidden elements are not rendered */
+    }
+
+    .sidebar.collapsed {
+      width: 50px;
+    }
+
+    .sidebar > * {
+      z-index: 1;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 20px 10px;
+      background-color: rgba(39, 56, 73, 0.6);
+      gap: 10px;
+    }
+
+    .sidebar h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      white-space: nowrap;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .sidebar.collapsed #sidebarTitle {
+      opacity: 0;
+      visibility: hidden;
+      width: 0;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      min-width: 20px;
+    }
+
+    .sidebar.collapsed .menu-btn {
+      transform: scale3d(1.5, 1.5, 1.5);
+    }
+
+    .nav-link {
+      padding: 8px 16px;
+      color: #b0bec5;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-direction: column;
+    }
+
+    .nav-link:hover {
+      background-color: rgba(55, 73, 92, 0.6);
+      color: white;
+    }
+
+    .nav-link img {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+    }
+
+    .nav-link:hover img {
+      transform: scale(1.3);
+    }
+
+    .sidebar.collapsed .nav-link {
+      padding: 20px 0;
+      justify-content: center;
+    }
+
+    .sidebar.collapsed .nav-link img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .nav-link span {
+      transition: opacity 0.1s ease, visibility 0.1s ease;
+      transition-delay: 0.1s;
+    }
+
+    .sidebar.collapsed .nav-link span {
+      opacity: 0;
+      visibility: hidden;
+      width: 0;
+      position: absolute;
+    }
+
+    .main {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      background-color: transparent;
+      transform: translateY(-100%);
+      opacity: 0;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+
+    .main.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .main.hidden {
+      display: none;
+    }
+
+    .header {
+      background-color: #1f2d3da8;
+      backdrop-filter: blur(1px);
+      padding: 5px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      z-index: 2;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .header-image {
+      height: 55px;
+      filter: invert(1);
+    }
+
+    .date-time-container {
+      position: fixed;
+      bottom: 10px;
+      left: 170px;
+      background-color: #1f2d3da8;
+      backdrop-filter: blur(2px);
+      padding: 5px 10px;
+      border-radius: 5px;
+      z-index: 2;
+      transition: left 0.3s ease, opacity 0.5s ease;
+      opacity: 0;
+    }
+
+    .date-time-container.visible {
+      opacity: 1;
+    }
+
+    .sidebar.collapsed ~ .date-time-container {
+      left: 60px;
+    }
+
+    .date-time {
+      font-size: 12px;
+      color: #b0bec5;
+      font-weight: 500;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .right-modal {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      background-color: white;
+      box-shadow: -4px 0 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .right-modal iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+        background-color: crimson;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 16px;
+      cursor: pointer;
+      z-index: 3;
+    }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #000000;
+      transition: .4s;
+      border: 1px solid #fff;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    .toggle-switch input:checked + .slider {
+      background-color: #4c59af;
+    }
+
+    .toggle-switch input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .toggle-label {
+      font-size: 14px;
+      color: white;
+    }
+
+    .lock-btn {
+      background-color: #ff4444;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .lock-btn:hover {
+      background-color: #cc0000;
+    }
+
+    .reset-btn {
+      background-color: #4c59af;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .reset-btn:hover {
+      background-color: #5a67d8;
+    }
+
+    .footer {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background-color: #1f2d3da8;
+      backdrop-filter: blur(2px);
+      padding: 5px 10px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 2;
+    }
+
+    .footer .made-by {
+      font-size: 12px;
+      margin: 0;
+    }
+
+    .footer .social-links a {
+      margin-left: 10px;
+    }
+
+    .footer .social-links img {
+      width: 20px;
+      height: 20px;
+      filter: invert(0);
+      transition: transform 0.2s ease;
+    }
+
+    .footer .social-links img:hover {
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Login Container -->
+  <div class="login-container" id="loginContainer">
+    <img src="https://i.ytimg.com/an/EQGgjL7Zkou4zjA7X-USYw/featured_channel.jpg" class="header-image" alt="Logo" />
+    <h2>Tool Hub Login</h2>
+    <input type="text" id="username" placeholder="Username" value="admin" />
+    <input type="password" id="password" placeholder="Password" value="admin" />
+    <button id="loginButton">Login</button>
+    <div class="error-message" id="errorMessage">Invalid username or password</div>
+  </div>
+
+  <!-- Tools Interface -->
+  <div class="sidebar hidden" id="sidebar">
+    <div class="sidebar-header">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <h2 id="sidebarTitle">Tool Hub</h2>
+    </div>
+    <div class="nav-link" onclick="openTool('http://95.216.72.6:90/home', true)">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/home.png" alt="Home" /><span>EMDPORTAL</span>
+    </div>
+    <div class="nav-link" onclick="openTool('http://135.181.112.243:45/', true)">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/dashboard.png" alt="Dashboard" /><span>Reporting Dashboard</span>
+    </div>
+    <div class="nav-link" onclick="openTool('https://www.emarketsolutions.org:7070/quickrepo_v5', true)">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/robot.png" alt="Selenium" /><span>Selenium</span>
+    </div>
+    <div class="nav-link" onclick="openTool('Bonus EMS.html')">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/gift.png" alt="Bonus" /><span>Bonus EMS</span>
+    </div>
+    <div class="nav-link" onclick="openTool('EMS6.html')">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/briefcase.png" alt="EMS6" /><span>EMS6</span>
+    </div>
+    <div class="nav-link" onclick="openTool('EMS3 23H00.html')">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/checklist.png" alt="EMS3 23H00" /><span>EMS3 23H00</span>
+    </div>
+    <div class="nav-link" onclick="openTool('Status Selenium.html')">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/change.png" alt="Status Selenium" /><span>Status Selenium</span>
+    </div>
+    <div class="nav-link" onclick="openTool('Bulk IPTV Link Validator.html')">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/tv.png" alt="IPTV" /><span>Bulk IPTV Validator</span>
+    </div>
+    <div class="nav-link" onclick="openTool('MB Calculator.html')">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/speed.png" alt="Calculator" /><span>Download Calculator</span>
+    </div>
+    <div class="nav-link" onclick="openTool('User Agent.html')">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/info.png" alt="User Agent" /><span>User-Agent Detector</span>
+    </div>
+    <div class="nav-link" onclick="openTool('https://emsw2025.github.io/ramadan2025/')">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/trophy.png" alt="Tournament" /><span>Ramadan Tournament</span>
+    </div>
+    <div class="nav-link" onclick="openTool('search word.html')">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/search.png" alt="Search" /><span>Search Word</span>
+    </div>
+    <div class="nav-link" onclick="openTool('https://fast.com')">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/wifi.png" alt="Speed" /><span>Test Internet Speed</span>
+    </div>
+    <div class="nav-link" onclick="openTool('password_generator.html')">
+      <img src="https://img.icons8.com/ios-filled/24/ffffff/lock.png" alt="Password" /><span>Password Generator</span>
+    </div>
+  </div>
+
+  <div class="main hidden" id="main">
+    <div class="header">
+      <div class="header-content">
+        <h3>Welcome to Tool Hub</h3>
+      </div>
+      <img src="https://i.ytimg.com/an/EQGgjL7Zkou4zjA7X-USYw/featured_channel.jpg" class="header-image" alt="Logo" />
+      <div class="toggle-container">
+        <label class="toggle-switch">
+          <input type="checkbox" id="modalToggle" checked>
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label">Use Modal</span>
+        <button class="lock-btn" id="lockButton">
+          <img src="https://img.icons8.com/ios-filled/16/ffffff/unlock.png" alt="Lock" />
+        </button>
+        <button class="reset-btn" id="resetButton">
+          <img src="https://img.icons8.com/ios-filled/16/ffffff/refresh.png" alt="Reset" />
+        </button>
+      </div>
+    </div>
+    <div class="right-modal" id="modal">
+      <button class="close-btn" onclick="closeModal()">✕ Close</button>
+      <iframe id="modalIframe" src=""></iframe>
+    </div>
+  </div>
+
+  <!-- Date and Time Container -->
+  <div class="date-time-container">
+    <div id="dateTime" class="date-time"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span class="made-by">Made by EMSW</span>
+    <div class="social-links">
+      <a href="https://www.facebook.com" target="_blank"><img src="https://img.icons8.com/ios-filled/24/ffffff/facebook.png" alt="Facebook"></a>
+      <a href="https://www.twitter.com" target="_blank"><img src="https://img.icons8.com/ios-filled/24/ffffff/twitter.png" alt="Twitter"></a>
+      <a href="https://www.instagram.com" target="_blank"><img src="https://img.icons8.com/ios-filled/24/ffffff/instagram.png" alt="Instagram"></a>
+      <a href="https://www.linkedin.com" target="_blank"><img src="https://img.icons8.com/ios-filled/24/ffffff/linkedin.png" alt="LinkedIn"></a>
+    </div>
+  </div>
+
+  <script>
+    // Update date and time
+    function updateDateTime() {
+      const dateTimeElement = document.getElementById('dateTime');
+      const now = new Date();
+      const options = {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      };
+      const formattedDateTime = now.toLocaleString('fr-US', options).replace(',', '');
+      dateTimeElement.textContent = formattedDateTime;
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      updateDateTime();
+      setInterval(updateDateTime, 1000);
+
+      const loginButton = document.getElementById('loginButton');
+      const lockButton = document.getElementById('lockButton');
+      const resetButton = document.getElementById('resetButton');
+      const modalToggle = document.getElementById('modalToggle');
+
+      loginButton.addEventListener('click', login);
+      lockButton.addEventListener('click', lock);
+      resetButton.addEventListener('click', resetSettings);
+      modalToggle.addEventListener('change', saveModalState);
+
+      if (localStorage.getItem('isLoggedIn') === 'true') {
+        console.log('User is logged in, showing main interface');
+        document.getElementById('loginContainer').classList.add('hidden');
+        document.getElementById('sidebar').classList.remove('hidden');
+        document.getElementById('main').classList.remove('hidden');
+        setTimeout(() => {
+          document.getElementById('sidebar').classList.add('visible');
+          document.getElementById('main').classList.add('visible');
+          document.querySelector('.date-time-container').classList.add('visible');
+        }, 10); // Small delay to ensure DOM is ready
+        restoreStates();
+      }
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !document.getElementById('loginContainer').classList.contains('hidden')) {
+          login();
+        }
+      });
+    });
+
+    // Login function
+    function login() {
+      console.log('Login attempt');
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errorMessage = document.getElementById('errorMessage');
+
+      if (username === 'admin' && password === 'admin') {
+        console.log('Credentials valid, proceeding with login');
+        localStorage.setItem('isLoggedIn', 'true');
+        const loginContainer = document.getElementById('loginContainer');
+        const sidebar = document.getElementById('sidebar');
+        const main = document.getElementById('main');
+        const dateTimeContainer = document.querySelector('.date-time-container');
+
+        loginContainer.classList.add('hidden');
+        console.log('Login container hidden');
+
+        setTimeout(() => {
+          console.log('Showing sidebar and main content');
+          sidebar.classList.remove('hidden');
+          main.classList.remove('hidden');
+          sidebar.classList.add('visible');
+          main.classList.add('visible');
+          dateTimeContainer.classList.add('visible');
+          restoreStates();
+        }, 500);
+      } else {
+        console.log('Invalid credentials');
+        errorMessage.style.display = 'block';
+      }
+    }
+
+    // Lock (logout) function
+    function lock() {
+      console.log('Logging out');
+      localStorage.removeItem('isLoggedIn');
+      const loginContainer = document.getElementById('loginContainer');
+      const sidebar = document.getElementById('sidebar');
+      const main = document.getElementById('main');
+      const dateTimeContainer = document.querySelector('.date-time-container');
+
+      sidebar.classList.remove('visible');
+      main.classList.remove('visible');
+      dateTimeContainer.classList.remove('visible');
+
+      setTimeout(() => {
+        console.log('Hiding sidebar and main, showing login');
+        sidebar.classList.add('hidden');
+        main.classList.add('hidden');
+        loginContainer.classList.remove('hidden');
+        document.getElementById('username').value = 'admin';
+        document.getElementById('password').value = 'admin';
+        document.getElementById('errorMessage').style.display = 'none';
+        document.getElementById('modalIframe').src = '';
+        document.getElementById('modal').style.display = 'none';
+      }, 500);
+    }
+
+    // Reset settings function
+    function resetSettings() {
+      console.log('Resetting settings');
+      localStorage.setItem('sidebarCollapsed', 'false');
+      localStorage.setItem('modalToggle', 'true');
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.remove('collapsed');
+      document.getElementById('modalToggle').checked = true;
+      document.getElementById('modalIframe').src = '';
+      document.getElementById('modal').style.display = 'none';
+    }
+
+    // Save modal toggle state
+    function saveModalState() {
+      console.log('Saving modal toggle state');
+      localStorage.setItem('modalToggle', document.getElementById('modalToggle').checked);
+    }
+
+    // Restore saved states
+    function restoreStates() {
+      console.log('Restoring states');
+      const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+      const sidebar = document.getElementById('sidebar');
+      if (isCollapsed) {
+        sidebar.classList.add('collapsed');
+      } else {
+        sidebar.classList.remove('collapsed');
+      }
+
+      const modalToggle = document.getElementById('modalToggle');
+      const isModalToggled = localStorage.getItem('modalToggle') === 'true' || localStorage.getItem('modalToggle') === null;
+      modalToggle.checked = isModalToggled;
+
+      if (localStorage.getItem('isLoggedIn') === 'true') {
+        sidebar.classList.add('visible');
+        document.getElementById('main').classList.add('visible');
+        document.querySelector('.date-time-container').classList.add('visible');
+      }
+    }
+
+    // Toggle sidebar
+    function toggleSidebar() {
+      console.log('Toggling sidebar');
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('collapsed');
+      localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    }
+
+    // Open tool
+    function openTool(url, alwaysNewTab = false) {
+      console.log('Opening tool:', url);
+      const useModal = document.getElementById('modalToggle').checked;
+      const modal = document.getElementById('modal');
+      const iframe = document.getElementById('modalIframe');
+
+      if (alwaysNewTab) {
+        window.open(url, '_blank');
+      } else {
+        if (useModal) {
+          iframe.src = url;
+          modal.style.display = 'flex';
+        } else {
+          window.open(url, '_blank');
+        }
+      }
+    }
+
+    // Close modal
+    function closeModal() {
+      console.log('Closing modal');
+      const modal = document.getElementById('modal');
+      const iframe = document.getElementById('modalIframe');
+      iframe.src = '';
+      modal.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
