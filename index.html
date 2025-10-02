@@ -95,6 +95,14 @@
                 padding-right: 2.5rem;
             }
         }
+        
+        /* === NEW: TEXT SHIMMER KEYFRAMES === */
+        @keyframes text-shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        /* ================================== */
+
 
         /* Header Styles */
         .portal-header {
@@ -122,9 +130,29 @@
                 font-size: 3.75rem;
             }
         }
+        
+        /* Updated: Animated Accent Span Style */
         .portal-header h1 span {
-            color: var(--color-indigo-400);
+            /* Make text transparent to show gradient background */
+            color: transparent; 
+            
+            /* Define the slow, subtle gradient that will move */
+            background: linear-gradient(
+                90deg, 
+                var(--color-indigo-400) 0%, 
+                var(--color-text-light) 50%, 
+                var(--color-indigo-400) 100%
+            );
+            
+            /* Set size and clip the background to the text shape */
+            background-size: 200% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            
+            /* Apply the animation slowly over 4s */
+            animation: text-shimmer 4s linear infinite;
         }
+
         .portal-header p {
             font-size: 1.25rem;
             color: var(--color-slate-400);
@@ -181,7 +209,7 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-        /* Responsive: lg:grid-cols-4 */
+        /* Responsive: lg:grid-cols-4 - keeping 4 columns works best with the right column file list */
         @media (min-width: 1024px) {
             .card-grid {
                 grid-template-columns: repeat(4, 1fr);
@@ -200,12 +228,41 @@
             transition: all 0.3s ease-in-out;
             text-decoration: none;
             cursor: pointer;
+            
+            /* Add position relative for the glow effect */
+            position: relative;
+            overflow: hidden;
         }
+
+        /* Radial Glow Effect */
+        .shortcut-card::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150%; 
+            height: 150%; 
+            /* Use glow-color variable, fallback to indigo if not set */
+            background: radial-gradient(circle, var(--glow-color, rgba(129, 140, 248, 0.25)) 0%, transparent 70%);
+            opacity: 0; /* Hidden by default */
+            transform: translate(-50%, -50%) scale(0.8); /* Start smaller */
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            pointer-events: none;
+            z-index: -1; 
+        }
+
         .shortcut-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 30px -5px rgba(59, 130, 246, 0.4), 0 10px 15px -5px rgba(59, 130, 246, 0.2);
-            border-color: var(--color-blue-500);
+            /* Existing shadow enhanced for lift */
+            box-shadow: 0 20px 30px -5px rgba(0, 0, 0, 0.5); 
+            border-color: var(--hover-border-color, var(--color-blue-500)); /* Uses specific card color */
         }
+        
+        .shortcut-card:hover::after {
+            opacity: 1; /* Show glow on hover */
+            transform: translate(-50%, -50%) scale(1); /* Scale up subtly */
+        }
+        
         .shortcut-card:focus {
              outline: 2px solid transparent;
              outline-offset: 2px;
@@ -247,26 +304,63 @@
             height: 2rem;
         }
 
-        /* Specific Card Color Overrides */
-        .card-blue { border-color: var(--color-slate-700); }
-        .card-blue:hover { border-color: var(--color-blue-500); }
+        /* Specific Card Color Overrides (Including Hover/Glow Variables) */
+        
+        /* Blue Card */
+        .card-blue { 
+            --hover-border-color: var(--color-blue-500);
+            --glow-color: rgba(59, 130, 246, 0.4); 
+        }
+        .card-blue:hover { 
+            box-shadow: 0 20px 30px -5px rgba(59, 130, 246, 0.2), 0 10px 15px -5px rgba(59, 130, 246, 0.1);
+        }
         .card-blue .card-icon-wrapper { background-color: var(--color-blue-500); box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); }
         .card-blue .card-link-text { color: var(--color-blue-500); }
         
-        .card-purple { border-color: var(--color-slate-700); }
-        .card-purple:hover { border-color: var(--color-purple-500); }
+        /* Purple Card */
+        .card-purple { 
+            --hover-border-color: var(--color-purple-500); 
+            --glow-color: rgba(168, 85, 247, 0.4); 
+        }
+        .card-purple:hover {
+            box-shadow: 0 20px 30px -5px rgba(168, 85, 247, 0.2), 0 10px 15px -5px rgba(168, 85, 247, 0.1);
+        }
         .card-purple .card-icon-wrapper { background-color: var(--color-purple-500); box-shadow: 0 10px 15px -3px rgba(168, 85, 247, 0.3); }
         .card-purple .card-link-text { color: #c084fc; } /* purple-400 */
         
-        .card-green { border-color: var(--color-slate-700); }
-        .card-green:hover { border-color: var(--color-green-500); }
+        /* Green Card */
+        .card-green { 
+            --hover-border-color: var(--color-green-500); 
+            --glow-color: rgba(34, 197, 94, 0.4); 
+        }
+        .card-green:hover {
+             box-shadow: 0 20px 30px -5px rgba(34, 197, 94, 0.2), 0 10px 15px -5px rgba(34, 197, 94, 0.1);
+        }
         .card-green .card-icon-wrapper { background-color: var(--color-green-500); box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.3); }
         .card-green .card-link-text { color: #4ade80; } /* green-400 */
 
-        .card-red { border-color: var(--color-slate-700); }
-        .card-red:hover { border-color: var(--color-red-500); }
+        /* Red Card */
+        .card-red { 
+            --hover-border-color: var(--color-red-500); 
+            --glow-color: rgba(239, 68, 68, 0.4); 
+        }
+        .card-red:hover {
+            box-shadow: 0 20px 30px -5px rgba(239, 68, 68, 0.2), 0 10px 15px -5px rgba(239, 68, 68, 0.1);
+        }
         .card-red .card-icon-wrapper { background-color: var(--color-red-500); box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.3); }
         .card-red .card-link-text { color: #f87171; } /* red-400 */
+        
+        /* Orange Card (New Utility) */
+        .card-orange { 
+            --hover-border-color: var(--color-orange-600); 
+            --glow-color: rgba(249, 115, 22, 0.4); 
+        }
+        .card-orange:hover {
+            box-shadow: 0 20px 30px -5px rgba(249, 115, 22, 0.2), 0 10px 15px -5px rgba(249, 115, 22, 0.1);
+        }
+        .card-orange .card-icon-wrapper { background-color: var(--color-orange-600); box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3); }
+        .card-orange .card-link-text { color: #fdba74; } /* orange-300 */
+
 
         /* Script Macros List Box */
         .script-macros-box {
@@ -588,7 +682,9 @@
             <!-- Wrapper for H1 and Button -->
             <div class="h1-wrapper">
                 <h1>
-                    Welcome to the <span class="text-indigo-400">EMSW Tools</span>
+                    Welcome to the 
+                    <!-- The span contains the animated accent text -->
+                    <span class="text-indigo-400">EMSW Tools</span>
                 </h1>
                 <!-- Button to show Organigram -->
                 <button id="show-organigram-btn" class="team-button" aria-controls="organigram-modal">
@@ -759,6 +855,7 @@
                         </span>
                     </div>
                 </a>
+                
             </div>
             
             <!-- Script Macros File List (For large screens) -->
@@ -830,7 +927,7 @@
         </footer>
     </div>
 
-    <!-- Initialize Lucide Icons -->
+    <!-- Initialize Lucide Icons and Modal Logic -->
     <script>
         lucide.createIcons();
 
