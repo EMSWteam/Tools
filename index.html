@@ -27,8 +27,32 @@
         }
         .shortcut-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.4), 0 10px 10px -5px rgba(59, 130, 246, 0.2); /* Blue glowing shadow */
+            /* Updated shadow for a slightly more defined glow */
+            box-shadow: 0 20px 30px -5px rgba(59, 130, 246, 0.4), 0 10px 15px -5px rgba(59, 130, 246, 0.2);
             border-color: #3b82f6; /* Accent border on hover */
+        }
+        
+        /* Styling for the file row */
+        .file-row {
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+            cursor: default; /* Indicate the row itself is not a primary click target */
+        }
+        .file-row:hover {
+            border-left-color: #f59e0b; /* Amber 500 */
+            background-color: #1e293b; /* Slate 800 */
+        }
+
+        /* Styling for the download button */
+        .download-btn {
+            transition: background-color 0.15s, transform 0.1s;
+        }
+        .download-btn:hover {
+            transform: scale(1.05);
+            background-color: #f97316; /* Orange 600 */
+        }
+        .download-btn:active {
+            transform: scale(0.98);
         }
     </style>
 </head>
@@ -37,74 +61,141 @@
     <div class="w-full max-w-6xl p-6 md:p-10">
         <!-- Portal Header -->
         <header class="text-center mb-12">
+            <!-- Updated Header Title -->
             <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight">
                 Welcome to the <span class="text-indigo-400">EMSW Tools</span>
             </h1>
+            <!-- Updated Header Subtitle -->
             <p class="text-xl text-slate-400 max-w-2xl mx-auto">
                 Select a tool below.
             </p>
         </header>
 
-        <!-- Shortcut Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-
-            <!-- Shortcut 1: Task EMS3-4-6 + Night.html -->
-            <a href="Task EMS3-4-6 + Night.html" class="shortcut-card block p-8 rounded-2xl border border-slate-700 bg-slate-800/70 text-white hover:bg-slate-700/80 focus:outline-none focus:ring-4 focus:ring-blue-500/50 shadow-xl" aria-label="Go to Task EMS3-4-6 Night Mode">
-                <div class="flex flex-col items-start space-y-4">
-                    <div class="p-4 bg-blue-500 rounded-full text-white shadow-lg shadow-blue-500/30">
-                        <!-- Icon for Night Mode Task List -->
-                        <i data-lucide="moon" class="w-8 h-8"></i>
+        <!-- Main Content Grid (Two-Column Layout on larger screens) -->
+        <div class="grid lg:grid-cols-4 gap-8">
+            
+            <!-- Column 1: Script Macros File List (Only visible on medium/large screens) -->
+            <div class="hidden lg:block lg:col-span-1 p-4 rounded-xl bg-slate-800/50 border border-slate-700 h-fit">
+                <h3 class="text-xl font-semibold text-amber-400 mb-4 flex items-center">
+                    <i data-lucide="code" class="w-6 h-6 mr-2"></i>
+                    Script Macros
+                </h3>
+                
+                <div class="space-y-2">
+                    
+                    <!-- File 1: a.js with explicit button -->
+                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
+                        <span class="text-slate-300 text-base font-mono">1. a.js</span>
+                        <a href="a.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
+                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                            Download
+                        </a>
                     </div>
-                    <h2 class="text-3xl font-bold">Task EMS3-4-6 (Night)</h2>
-                    <p class="text-slate-400 text-lg">
-                        Access the combined task list with night mode enabled for lower light usage.
-                    </p>
-                    <span class="text-blue-400 font-semibold flex items-center mt-4">
-                        Launch Tool
-                        <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
-                    </span>
-                </div>
-            </a>
-
-            <!-- Shortcut 2: Email Combinator.html -->
-            <a href="Email Combinator.html" class="shortcut-card block p-8 rounded-2xl border border-slate-700 bg-slate-800/70 text-white hover:bg-slate-700/80 focus:outline-none focus:ring-4 focus:ring-purple-500/50 shadow-xl" aria-label="Go to Email Combinator">
-                <div class="flex flex-col items-start space-y-4">
-                    <div class="p-4 bg-purple-500 rounded-full text-white shadow-lg shadow-purple-500/30">
-                        <!-- Icon for Email -->
-                        <i data-lucide="mail" class="w-8 h-8"></i>
+                    
+                    <!-- File 2: b.js with explicit button -->
+                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
+                        <span class="text-slate-300 text-base font-mono">2. b.js</span>
+                        <a href="b.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
+                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                            Download
+                        </a>
                     </div>
-                    <h2 class="text-3xl font-bold">Email Combinator</h2>
-                    <p class="text-slate-400 text-lg">
-                        Utility to combine, format, or process lists of email addresses efficiently.
+                    
+                    <!-- Optional hint -->
+                    <p class="text-xs text-slate-500 pt-2 border-t border-slate-700 mt-4">
+                        (Click the download button to save the file.)
                     </p>
-                    <span class="text-purple-400 font-semibold flex items-center mt-4">
-                        Launch Tool
-                        <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
-                    </span>
                 </div>
-            </a>
+            </div>
 
-            <!-- Shortcut 3: IPs Export.html -->
-            <a href="IPs Export.html" class="shortcut-card block p-8 rounded-2xl border border-slate-700 bg-slate-800/70 text-white hover:bg-slate-700/80 focus:outline-none focus:ring-4 focus:ring-green-500/50 shadow-xl" aria-label="Go to IPs Export Tool">
-                <div class="flex flex-col items-start space-y-4">
-                    <div class="p-4 bg-green-500 rounded-full text-white shadow-lg shadow-green-500/30">
-                        <!-- Icon for Server/Network -->
-                        <i data-lucide="server" class="w-8 h-8"></i>
+            <!-- Column 2: Main Shortcut Cards (Takes up 3/4 of the width on large screens) -->
+            <div class="col-span-1 lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <!-- Shortcut 1: Task EMS3-4-6 + Night.html (Blue) -->
+                <a href="Task EMS3-4-6 + Night.html" class="shortcut-card block p-8 rounded-2xl border border-slate-700 bg-slate-800/70 text-white hover:bg-slate-700/80 focus:outline-none focus:ring-4 focus:ring-blue-500/50 shadow-xl" aria-label="Go to Task EMS3-4-6 Night Mode">
+                    <div class="flex flex-col items-start space-y-4">
+                        <div class="p-4 bg-blue-500 rounded-full text-white shadow-lg shadow-blue-500/30">
+                            <!-- Icon for Night Mode Task List -->
+                            <i data-lucide="moon" class="w-8 h-8"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold">Task EMS3-4-6 (Night)</h2>
+                        <p class="text-slate-400 text-lg">
+                            Access the combined task list with night mode enabled for lower light usage.
+                        </p>
+                        <span class="text-blue-400 font-semibold flex items-center mt-4">
+                            Launch Tool
+                            <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                        </span>
                     </div>
-                    <h2 class="text-3xl font-bold">IPs Export Tool</h2>
-                    <p class="text-slate-400 text-lg">
-                        Quickly export lists of IP addresses for logging, monitoring, or analysis purposes.
-                    </p>
-                    <span class="text-green-400 font-semibold flex items-center mt-4">
-                        Launch Tool
-                        <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
-                    </span>
+                </a>
+
+                <!-- Shortcut 2: Email Combinator.html (Purple) -->
+                <a href="Email Combinator.html" class="shortcut-card block p-8 rounded-2xl border border-slate-700 bg-slate-800/70 text-white hover:bg-slate-700/80 focus:outline-none focus:ring-4 focus:ring-purple-500/50 shadow-xl" aria-label="Go to Email Combinator">
+                    <div class="flex flex-col items-start space-y-4">
+                        <div class="p-4 bg-purple-500 rounded-full text-white shadow-lg shadow-purple-500/30">
+                            <!-- Icon for Email -->
+                            <i data-lucide="mail" class="w-8 h-8"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold">Email Combinator</h2>
+                        <p class="text-slate-400 text-lg">
+                            Utility to combine, format, or process lists of email addresses efficiently.
+                        </p>
+                        <span class="text-purple-400 font-semibold flex items-center mt-4">
+                            Launch Tool
+                            <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Shortcut 3: IPs Export.html (Green) -->
+                <a href="IPs Export.html" class="shortcut-card block p-8 rounded-2xl border border-slate-700 bg-slate-800/70 text-white hover:bg-slate-700/80 focus:outline-none focus:ring-4 focus:ring-green-500/50 shadow-xl" aria-label="Go to IPs Export Tool">
+                    <div class="flex flex-col items-start space-y-4">
+                        <div class="p-4 bg-green-500 rounded-full text-white shadow-lg shadow-green-500/30">
+                            <!-- Icon for Server/Network -->
+                            <i data-lucide="server" class="w-8 h-8"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold">IPs Export Tool</h2>
+                        <p class="text-slate-400 text-lg">
+                            Quickly export lists of IP addresses for logging, monitoring, or analysis purposes.
+                        </p>
+                        <span class="text-green-400 font-semibold flex items-center mt-4">
+                            Launch Tool
+                            <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                        </span>
+                    </div>
+                </a>
+            </div>
+            
+            <!-- Fallback for small screens: Script Macros at the bottom -->
+            <div class="lg:hidden col-span-1 mt-8 p-4 rounded-xl bg-slate-800/50 border border-slate-700">
+                <h3 class="text-xl font-semibold text-amber-400 mb-4 flex items-center">
+                    <i data-lucide="code" class="w-6 h-6 mr-2"></i>
+                    Script Macros
+                </h3>
+                <div class="space-y-3">
+                    <!-- File 1: a.js with explicit button -->
+                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
+                        <span class="text-slate-300 text-base font-mono">1. a.js</span>
+                        <a href="a.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
+                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                            Download
+                        </a>
+                    </div>
+                    <!-- File 2: b.js with explicit button -->
+                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
+                        <span class="text-slate-300 text-base font-mono">2. b.js</span>
+                        <a href="b.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
+                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                            Download
+                        </a>
+                    </div>
                 </div>
-            </a>
+            </div>
         </div>
 
         <!-- Footer Note -->
         <footer class="mt-16 text-center text-slate-500 text-sm">
+            <!-- Updated Footer Text -->
             <p>By EMSW Team.</p>
         </footer>
     </div>
