@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gmail Filter → URLs</title>
+<style>
+  body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    background: #f5f6fa; 
+    margin: 0; 
+    padding: 20px; 
+    color: #333;
+  }
+
+  h2 {
+    text-align: center;
+    color: #2f3640;
+  }
+
+  textarea, button, input[type=number] { 
+    width: 100%; 
+    padding: 10px; 
+    font-size: 16px; 
+    border-radius: 6px; 
+    border: 1px solid #ccc; 
+    box-sizing: border-box;
+  }
+
+  textarea { height: 50px; resize: vertical; }
+  button { 
+    background: #4cd137; 
+    color: white; 
+    border: none; 
+    font-weight: bold; 
+    cursor: pointer; 
+    transition: background 0.3s; 
+    margin-top: 10px;
+  }
+  button:hover { background: #44bd32; }
+
+  .options, .result {
+    background: white; 
+    border-radius: 10px; 
+    padding: 15px; 
+    margin-top: 15px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+
+  .option-item { 
+    display: flex; 
+    align-items: center; 
+    margin-bottom: 8px; 
+    padding: 5px 8px; 
+    border-radius: 6px; 
+    background: #f1f2f6; 
+    cursor: move;
+    transition: background 0.2s;
+  }
+  .option-item:hover { background: #dcdde1; }
+
+  .option-item input[type="checkbox"] { margin-right: 10px; }
+  .option-item input[type="number"] { width: 60px; margin-left: 5px; border: 1px solid #ccc; border-radius: 6px; }
+
+  .option-item textarea { flex: 1; margin-right: 5px; border: 1px solid #ccc; border-radius: 6px; padding: 5px; }
+
+  .result strong { display: block; margin-bottom: 5px; color: #2f3640; }
+  a { display: block; word-break: break-all; margin-bottom: 5px; color: #0097e6; font-weight: bold; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .copy-btn {
+    background: #40739e; 
+    color: white; 
+    border: none; 
+    border-radius: 6px; 
+    padding: 6px 12px; 
+    cursor: pointer; 
+    font-weight: bold;
+    transition: background 0.3s;
+  }
+  .copy-btn:hover { background: #2f3640; }
+
+  label { font-weight: bold; margin-top: 10px; display: block; color: #2f3640; }
+</style>
+</head>
+<body>
+
+<h2>Gmail Filter → Inbox & Spam URLs</h2>
+
+<label>Main Filter & Extra Options (drag to reorder)</label>
+<div class="options" id="extra-options">
+  <div class="option-item" draggable="true">
+    <input type="checkbox" class="extra-option" data-type="text" checked>
+    <textarea class="main-filter-text" placeholder='Enter main filter text'></textarea>
+  </div>
+
+  <div class="option-item" draggable="true">
+    <input type="checkbox" class="extra-option" data-type="simple" value="is:unread"> is:unread
+  </div>
+  <div class="option-item" draggable="true">
+    <input type="checkbox" class="extra-option" data-type="simple" value="has:attachment"> has:attachment
+  </div>
+  <div class="option-item" draggable="true">
+    <input type="checkbox" class="extra-option" data-type="days" data-base="newer_than" value="newer_than"> newer_than 
+    <input type="number" class="days-input" min="1" placeholder="days">
+  </div>
+  <div class="option-item" draggable="true">
+    <input type="checkbox" class="extra-option" data-type="days" data-base="older_than" value="older_than"> older_than 
+    <input type="number" class="days-input" min="1" placeholder="days">
+  </div>
+</div>
+
+<button onclick="generateURLs()">Generate URLs</button>
+
+<div id="results" class="result" style="display:none;">
+  <div>
+    <strong>Inbox URL:</strong>
+    <a id="inbox-link" href="#" target="_blank"></a>
+    <button class="copy-btn" onclick="copyLink('inbox-link')">Copy Inbox URL</button>
+  </div>
+  <div style="margin-top: 15px;">
+    <strong>Spam URL:</strong>
+    <a id="spam-link" href="#" target="_blank"></a>
+    <button class="copy-btn" onclick="copyLink('spam-link')">Copy Spam URL</button>
+  </div>
+</div>
+
+<script>
+// Drag & drop
+const optionsContainer = document.getElementById('extra-options');
+let dragged;
+optionsContainer.addEventListener('dragstart', (e) => { dragged = e.target; e.dataTransfer.effectAllowed = 'move'; });
+optionsContainer.addEventListener('dragover', (e) => e.preventDefault());
+optionsContainer.addEventListener('drop', (e) => {
+  e.preventDefault();
+  if(e.target.classList.contains('option-item')){
+    optionsContainer.insertBefore(dragged, e.target.nextSibling);
+  }
+});
+
+function generateURLs() {
+    const optionElements = document.querySelectorAll('.option-item');
+    const selectedParts = [];
+
+    optionElements.forEach(el => {
+        const checkbox = el.querySelector('input[type="checkbox"]');
+        if(checkbox.checked){
+            const type = checkbox.dataset.type;
+            if(type === 'simple'){
+                selectedParts.push(checkbox.value);
+            } else if(type === 'days'){
+                const daysInput = el.querySelector('.days-input');
+                if(daysInput.value) selectedParts.push(`${checkbox.dataset.base}:${daysInput.value}d`);
+            } else if(type === 'text'){
+                const textArea = el.querySelector('.main-filter-text');
+                if(textArea.value.trim()) selectedParts.push(textArea.value.trim());
+            }
+        }
+    });
+
+    const fullFilter = selectedParts.join(' ');
+    const encoded = encodeURIComponent(fullFilter).replace(/%20/g, '+');
+
+    const inboxURL = `https://mail.google.com/mail//u/0/#search/${encoded}`;
+    const spamURL = `https://mail.google.com/mail//u/0/#search/in%3Aspam+${encoded}`;
+
+    document.getElementById('inbox-link').href = inboxURL;
+    document.getElementById('inbox-link').textContent = inboxURL;
+
+    document.getElementById('spam-link').href = spamURL;
+    document.getElementById('spam-link').textContent = spamURL;
+
+    document.getElementById('results').style.display = 'block';
+}
+
+function copyLink(id) {
+    const link = document.getElementById(id).href;
+    navigator.clipboard.writeText(link).then(() => { alert("Copied to clipboard!"); })
+    .catch(err => alert("Failed to copy: " + err));
+}
+</script>
+
+</body>
+</html>
