@@ -4,258 +4,532 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Application Portal Hub</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS CDN link has been removed. All styles are now defined in the <style> block. -->
+    
     <!-- Load Lucide Icons for stylish icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Load particles.js library -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <style>
+        /* CSS Variables for colors and spacing */
+        :root {
+            --color-bg-dark: #0f172a; /* slate-900 */
+            --color-slate-800: #1e293b;
+            --color-slate-700: #334155;
+            --color-slate-500: #64748b;
+            --color-slate-400: #94a3b8;
+            --color-text-light: #ffffff;
+            --color-indigo-400: #818cf8; /* main accent color */
+            --color-blue-500: #3b82f6;
+            --color-purple-500: #a855f7;
+            --color-green-500: #22c55e;
+            --color-red-500: #ef4444;
+            --color-amber-400: #fbbf24;
+            --color-amber-500: #f59e0b;
+            --color-orange-600: #f97316;
+        }
+
+        /* CRITICAL FIX: Ensure no scrolling on the entire page */
+        html, body {
+            height: 100%; /* Use full height */
+            overflow: hidden; /* Prevent all scrolling */
+        }
+        
         /* Custom font import for "Inter" */
         body {
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* Deep, dark gradient background */
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            padding: 20px;
+            height: 100vh;
+            position: relative;
+            background: var(--color-bg-dark); 
+            padding: 0;
+            margin: 0;
+        }
+        
+        /* Particle Canvas Styling */
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
 
-        /* Styling the shortcut cards */
+        /* Main Content Wrapper - Replaces .w-full.max-w-6xl.p-6.md:p-10.portal-content */
+        .portal-content {
+            /* Scrollbar Hiding Styles */
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+
+            position: absolute;
+            z-index: 2;
+
+            /* Centering using absolute position and transform */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            
+            /* Sizing and Scrolling */
+            width: 100%;
+            max-width: 1280px; /* max-w-6xl */
+            max-height: 100vh;
+            overflow-y: auto;
+            padding-top: 1.5rem; /* p-6 */
+            padding-bottom: 1.5rem; /* p-6 */
+            padding-left: 1.5rem; /* p-6 */
+            padding-right: 1.5rem; /* p-6 */
+        }
+        /* Webkit specific scrollbar hiding (Chrome, Safari, Edge) */
+        .portal-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Responsive padding for medium screens and up (md:p-10) */
+        @media (min-width: 768px) {
+            .portal-content {
+                padding-top: 2.5rem;
+                padding-bottom: 2.5rem;
+                padding-left: 2.5rem;
+                padding-right: 2.5rem;
+            }
+        }
+
+        /* Header Styles - Replaces .text-center.mb-12 */
+        .portal-header {
+            text-align: center;
+            margin-bottom: 3rem; /* mb-12 */
+        }
+        .portal-header h1 {
+            font-size: 3rem; /* text-5xl */
+            font-weight: 800; /* font-extrabold */
+            color: var(--color-text-light); /* text-white */
+            margin-bottom: 1rem; /* mb-4 */
+            letter-spacing: -0.025em; /* tracking-tight */
+        }
+        @media (min-width: 768px) {
+            .portal-header h1 {
+                font-size: 3.75rem; /* md:text-6xl */
+            }
+        }
+        .portal-header h1 span {
+            color: var(--color-indigo-400); /* text-indigo-400 */
+        }
+        .portal-header p {
+            font-size: 1.25rem; /* text-xl */
+            color: var(--color-slate-400); /* text-slate-400 */
+            max-width: 42rem; /* max-w-2xl */
+            margin: 0 auto; /* mx-auto */
+        }
+
+        /* Main Grid - Replaces .grid.grid-cols-1.gap-8 */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem; /* gap-8 */
+        }
+        
+        /* Shortcut Cards Grid - Replaces .grid.grid-cols-1.sm:grid-cols-2.lg:grid-cols-4.gap-8 */
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* grid-cols-1 */
+            gap: 2rem; /* gap-8 */
+        }
+        /* Responsive: sm:grid-cols-2 */
+        @media (min-width: 640px) {
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        /* Responsive: lg:grid-cols-4 */
+        @media (min-width: 1024px) {
+            .card-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Shortcut Card Base Styles */
         .shortcut-card {
+            display: block;
+            padding: 2rem; /* p-8 */
+            border-radius: 1rem; /* rounded-2xl */
+            border: 1px solid var(--color-slate-700);
+            background-color: rgba(30, 41, 59, 0.7); /* bg-slate-800/70 */
+            color: var(--color-text-light);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
             transition: all 0.3s ease-in-out;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
         }
         .shortcut-card:hover {
             transform: translateY(-5px);
-            /* Updated shadow for a slightly more defined glow */
             box-shadow: 0 20px 30px -5px rgba(59, 130, 246, 0.4), 0 10px 15px -5px rgba(59, 130, 246, 0.2);
-            border-color: #3b82f6; /* Accent border on hover */
+            border-color: var(--color-blue-500);
         }
-        
-        /* Styling for the file row */
-        .file-row {
-            transition: all 0.2s;
-            border-left: 4px solid transparent;
-            cursor: default; /* Indicate the row itself is not a primary click target */
+        .shortcut-card:focus {
+             outline: 2px solid transparent;
+             outline-offset: 2px;
+             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5); /* focus:ring-4 focus:ring-blue-500/50 */
         }
-        .file-row:hover {
-            border-left-color: #f59e0b; /* Amber 500 */
-            background-color: #1e293b; /* Slate 800 */
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            row-gap: 1rem; /* space-y-4 */
+        }
+        .card-icon-wrapper {
+            padding: 1rem; /* p-4 */
+            border-radius: 9999px; /* rounded-full */
+            color: var(--color-text-light);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .shortcut-card h2 {
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700; /* font-bold */
+        }
+        .shortcut-card p {
+            color: var(--color-slate-400);
+            font-size: 1.125rem; /* text-lg */
+        }
+        .card-link-text {
+            font-weight: 600; /* font-semibold */
+            display: flex;
+            align-items: center;
+            margin-top: 1rem; /* mt-4 */
+        }
+        .card-link-text i {
+            width: 1.25rem; /* w-5 */
+            height: 1.25rem; /* h-5 */
+            margin-left: 0.5rem; /* ml-2 */
+        }
+        .card-icon-wrapper i {
+            width: 2rem; /* w-8 */
+            height: 2rem; /* h-8 */
         }
 
-        /* Styling for the download button */
+        /* Specific Card Color Overrides */
+        .card-blue { border-color: var(--color-slate-700); }
+        .card-blue:hover { border-color: var(--color-blue-500); }
+        .card-blue .card-icon-wrapper { background-color: var(--color-blue-500); box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); }
+        .card-blue .card-link-text { color: var(--color-blue-500); }
+        
+        .card-purple { border-color: var(--color-slate-700); }
+        .card-purple:hover { border-color: var(--color-purple-500); }
+        .card-purple .card-icon-wrapper { background-color: var(--color-purple-500); box-shadow: 0 10px 15px -3px rgba(168, 85, 247, 0.3); }
+        .card-purple .card-link-text { color: var(--color-purple-400); }
+        
+        .card-green { border-color: var(--color-slate-700); }
+        .card-green:hover { border-color: var(--color-green-500); }
+        .card-green .card-icon-wrapper { background-color: var(--color-green-500); box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.3); }
+        .card-green .card-link-text { color: var(--color-green-400); }
+
+        .card-red { border-color: var(--color-slate-700); }
+        .card-red:hover { border-color: var(--color-red-500); }
+        .card-red .card-icon-wrapper { background-color: var(--color-red-500); box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.3); }
+        .card-red .card-link-text { color: var(--color-red-400); }
+
+        /* Script Macros List Box - Replaces .p-4.rounded-xl.border.border-slate-700.bg-slate-800/50.h-fit */
+        .script-macros-box {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--color-slate-700);
+            background-color: rgba(30, 41, 59, 0.5);
+            height: fit-content;
+        }
+        .script-macros-box h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-amber-400);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .script-macros-box h3 i {
+            width: 1.5rem; /* w-6 */
+            height: 1.5rem; /* h-6 */
+            margin-right: 0.5rem;
+        }
+        .script-macros-box .space-y-3 > div {
+            margin-top: 0.75rem;
+        }
+        .script-macros-box .space-y-3 > div:first-child {
+            margin-top: 0;
+        }
+
+        /* File Row - Replaces .file-row.flex.items-center.justify-between.p-2.rounded-lg */
+        .file-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+            cursor: default;
+        }
+        .file-row:hover {
+            border-left-color: var(--color-amber-500);
+            background-color: var(--color-slate-800);
+        }
+        .file-row span {
+            color: #e2e8f0; /* text-slate-300 */
+            font-size: 1rem;
+            font-family: monospace;
+        }
+
+        /* Download Button - Replaces .download-btn.flex.items-center.px-3.py-1.bg-amber-500.text-slate-900.font-semibold.text-sm.rounded-full.shadow-lg */
         .download-btn {
+            display: flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            background-color: var(--color-amber-500);
+            color: var(--color-bg-dark); /* text-slate-900 */
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
             transition: background-color 0.15s, transform 0.1s;
+            text-decoration: none;
         }
         .download-btn:hover {
             transform: scale(1.05);
-            background-color: #f97316; /* Orange 600 */
+            background-color: var(--color-orange-600);
         }
         .download-btn:active {
             transform: scale(0.98);
         }
+        .download-btn i {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.25rem;
+        }
+        
+        /* Optional Hint - Replaces .text-xs.text-slate-500.pt-2.border-t.border-slate-700.mt-4 */
+        .file-hint {
+            font-size: 0.75rem;
+            color: var(--color-slate-500);
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--color-slate-700);
+            margin-top: 1rem;
+        }
+
+        /* Footer Styles - Replaces .mt-16.text-center.text-slate-500.text-sm */
+        .portal-footer {
+            margin-top: 4rem; /* mt-16 */
+            text-align: center;
+            color: var(--color-slate-500);
+            font-size: 0.875rem;
+        }
+
+        /* Responsive Visibility Classes (hidden, lg:hidden, lg:block) */
+        .hidden-desktop { display: block; } /* Default: visible (no lg:hidden means show) */
+        .hidden-mobile { display: none; } /* Default: hidden (hidden means hide) */
+        
+        @media (min-width: 1024px) { /* lg breakpoint */
+            .hidden-desktop { display: none; } /* lg:hidden */
+            .hidden-mobile { display: block; } /* lg:block */
+        }
     </style>
 </head>
 <body>
+    
+    <!-- 1. Particle Container (z-index: 1) -->
+    <div id="particles-js"></div>
 
-    <div class="w-full max-w-6xl p-6 md:p-10">
+    <!-- 2. Main Content Wrapper (z-index: 2) -->
+    <div class="portal-content">
         <!-- Portal Header -->
-        <header class="text-center mb-12">
-            <!-- Updated Header Title -->
-            <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight">
+        <header class="portal-header">
+            <h1>
                 Welcome to the <span class="text-indigo-400">EMSW Tools</span>
             </h1>
-            <!-- Updated Header Subtitle -->
-            <p class="text-xl text-slate-400 max-w-2xl mx-auto">
+            <p>
                 Select a tool below.
             </p>
         </header>
 
-        <!-- Main Content Grid (Single column layout to accommodate full-width cards) -->
-        <div class="grid grid-cols-1 gap-8">
+        <!-- Main Content Grid -->
+        <div class="main-grid">
             
             <!-- Fallback for small screens: Script Macros at the top -->
-            <div class="lg:hidden col-span-1 p-4 rounded-xl bg-slate-800/50 border border-slate-700">
-                <h3 class="text-xl font-semibold text-amber-400 mb-4 flex items-center">
-                    <i data-lucide="code" class="w-6 h-6 mr-2"></i>
+            <div class="hidden-desktop script-macros-box">
+                <h3>
+                    <i data-lucide="code"></i>
                     Script Macros
                 </h3>
                 <div class="space-y-3">
                     <!-- File 1: EMS3 + Limit + Nbr.js -->
-                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
-                        <span class="text-slate-300 text-base font-mono">1. EMS3 + Limit + Nbr.js</span>
-                        <a href="EMS3 + Limit + Nbr.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
-                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                    <div class="file-row">
+                        <span>1. EMS3 + Limit + Nbr.js</span>
+                        <a href="EMS3 + Limit + Nbr.js" download class="download-btn">
+                            <i data-lucide="download"></i>
                             Download
                         </a>
                     </div>
                     <!-- File 2: EMS6 + Limit6 + Nbr6.js -->
-                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
-                        <span class="text-slate-300 text-base font-mono">2. EMS6 + Limit6 + Nbr6.js</span>
-                        <a href="EMS6 + Limit6 + Nbr6.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
-                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                    <div class="file-row">
+                        <span>2. EMS6 + Limit6 + Nbr6.js</span>
+                        <a href="EMS6 + Limit6 + Nbr6.js" download class="download-btn">
+                            <i data-lucide="download"></i>
                             Download
                         </a>
                     </div>
                     <!-- File 3: IPS - EMS3.js -->
-                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
-                        <span class="text-slate-300 text-base font-mono">3. IPS - EMS3.js</span>
-                        <a href="IPS - EMS3.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
-                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                    <div class="file-row">
+                        <span>3. IPS - EMS3.js</span>
+                        <a href="IPS - EMS3.js" download class="download-btn">
+                            <i data-lucide="download"></i>
                             Download
                         </a>
                     </div>
                     <!-- File 4: IPS - EMS6.js -->
-                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
-                        <span class="text-slate-300 text-base font-mono">4. IPS - EMS6.js</span>
-                        <a href="IPS - EMS6.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
-                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                    <div class="file-row">
+                        <span>4. IPS - EMS6.js</span>
+                        <a href="IPS - EMS6.js" download class="download-btn">
+                            <i data-lucide="download"></i>
                             Download
                         </a>
                     </div>
                     <!-- File 5: Selenium.js -->
-                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
-                        <span class="text-slate-300 text-base font-mono">5. Selenium.js</span>
-                        <a href="Selenium.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
-                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                    <div class="file-row">
+                        <span>5. Selenium.js</span>
+                        <a href="Selenium.js" download class="download-btn">
+                            <i data-lucide="download"></i>
                             Download
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Shortcut Cards Container (Takes full width on all screens) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Shortcut Cards Container -->
+            <div class="card-grid">
                 
                 <!-- Shortcut 1: Task EMS3-4-6 + Night.html (Blue) -->
-                <a href="Task EMS3-4-6 + Night.html" class="shortcut-card block p-8 rounded-2xl border border-slate-700 bg-slate-800/70 text-white hover:bg-slate-700/80 focus:outline-none focus:ring-4 focus:ring-blue-500/50 shadow-xl" aria-label="Go to Task EMS3-4-6 Night Mode">
-                    <div class="flex flex-col items-start space-y-4">
-                        <div class="p-4 bg-blue-500 rounded-full text-white shadow-lg shadow-blue-500/30">
-                            <!-- Icon for Night Mode Task List -->
-                            <i data-lucide="moon" class="w-8 h-8"></i>
+                <a href="Task EMS3-4-6 + Night.html" class="shortcut-card card-blue" aria-label="Go to Task EMS3-4-6 Night Mode">
+                    <div class="card-content">
+                        <div class="card-icon-wrapper">
+                            <i data-lucide="moon"></i>
                         </div>
-                        <h2 class="text-3xl font-bold">Task EMS3-4-6 (Night)</h2>
-                        <p class="text-slate-400 text-lg">
+                        <h2>Task EMS3-4-6 (Night)</h2>
+                        <p>
                             Access the combined task list with night mode enabled for lower light usage.
                         </p>
-                        <span class="text-blue-400 font-semibold flex items-center mt-4">
+                        <span class="card-link-text">
                             Launch Tool
-                            <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                            <i data-lucide="arrow-right"></i>
                         </span>
                     </div>
                 </a>
 
                 <!-- Shortcut 2: Email Combinator.html (Purple) -->
-                <a href="Email Combinator.html" class="shortcut-card block p-8 rounded-2xl border border-slate-700 bg-slate-800/70 text-white hover:bg-slate-700/80 focus:outline-none focus:ring-4 focus:ring-purple-500/50 shadow-xl" aria-label="Go to Email Combinator">
-                    <div class="flex flex-col items-start space-y-4">
-                        <div class="p-4 bg-purple-500 rounded-full text-white shadow-lg shadow-purple-500/30">
-                            <!-- Icon for Email -->
-                            <i data-lucide="mail" class="w-8 h-8"></i>
+                <a href="Email Combinator.html" class="shortcut-card card-purple" aria-label="Go to Email Combinator">
+                    <div class="card-content">
+                        <div class="card-icon-wrapper">
+                            <i data-lucide="mail"></i>
                         </div>
-                        <h2 class="text-3xl font-bold">Email Combinator</h2>
-                        <p class="text-slate-400 text-lg">
+                        <h2>Email Combinator</h2>
+                        <p>
                             Utility to combine, format, or process lists of email addresses efficiently.
                         </p>
-                        <span class="text-purple-400 font-semibold flex items-center mt-4">
+                        <span class="card-link-text">
                             Launch Tool
-                            <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                            <i data-lucide="arrow-right"></i>
                         </span>
                     </div>
                 </a>
 
                 <!-- Shortcut 3: IPs Export.html (Green) -->
-                <a href="IPs Export.html" class="shortcut-card block p-8 rounded-2xl border border-slate-700 bg-slate-800/70 text-white hover:bg-slate-700/80 focus:outline-none focus:ring-4 focus:ring-green-500/50 shadow-xl" aria-label="Go to IPs Export Tool">
-                    <div class="flex flex-col items-start space-y-4">
-                        <div class="p-4 bg-green-500 rounded-full text-white shadow-lg shadow-green-500/30">
-                            <!-- Icon for Server/Network -->
-                            <i data-lucide="server" class="w-8 h-8"></i>
+                <a href="IPs Export.html" class="shortcut-card card-green" aria-label="Go to IPs Export Tool">
+                    <div class="card-content">
+                        <div class="card-icon-wrapper">
+                            <i data-lucide="server"></i>
                         </div>
-                        <h2 class="text-3xl font-bold">IPs Export Tool</h2>
-                        <p class="text-slate-400 text-lg">
+                        <h2>IPs Export Tool</h2>
+                        <p>
                             Quickly export lists of IP addresses for logging, monitoring, or analysis purposes.
                         </p>
-                        <span class="text-green-400 font-semibold flex items-center mt-4">
+                        <span class="card-link-text">
                             Launch Tool
-                            <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                            <i data-lucide="arrow-right"></i>
                         </span>
                     </div>
                 </a>
                 
-                <!-- NEW Shortcut 4: Gmail Filter.html (Red) -->
-                <a href="Gmail Filter.html" class="shortcut-card block p-8 rounded-2xl border border-slate-700 bg-slate-800/70 text-white hover:bg-slate-700/80 focus:outline-none focus:ring-4 focus:ring-red-500/50 shadow-xl" aria-label="Go to Gmail Filter Tool">
-                    <div class="flex flex-col items-start space-y-4">
-                        <div class="p-4 bg-red-500 rounded-full text-white shadow-lg shadow-red-500/30">
-                            <!-- Icon for Filter/Settings -->
-                            <i data-lucide="settings-2" class="w-8 h-8"></i>
+                <!-- Shortcut 4: Gmail Filter.html (Red) -->
+                <a href="Gmail Filter.html" class="shortcut-card card-red" aria-label="Go to Gmail Filter Tool">
+                    <div class="card-content">
+                        <div class="card-icon-wrapper">
+                            <i data-lucide="settings-2"></i>
                         </div>
-                        <h2 class="text-3xl font-bold">Gmail Filter</h2>
-                        <p class="text-slate-400 text-lg">
+                        <h2>Gmail Filter</h2>
+                        <p>
                             Generate and manage complex email filters for automatic sorting and organization.
                         </p>
-                        <span class="text-red-400 font-semibold flex items-center mt-4">
+                        <span class="card-link-text">
                             Launch Tool
-                            <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                            <i data-lucide="arrow-right"></i>
                         </span>
                     </div>
                 </a>
             </div>
             
-            <!-- Script Macros File List (For large screens, placed near the bottom for consistency) -->
-            <div class="hidden lg:block col-span-1 p-4 rounded-xl bg-slate-800/50 border border-slate-700 h-fit">
-                <h3 class="text-xl font-semibold text-amber-400 mb-4 flex items-center">
-                    <i data-lucide="code" class="w-6 h-6 mr-2"></i>
+            <!-- Script Macros File List (For large screens) -->
+            <div class="hidden-mobile script-macros-box">
+                <h3>
+                    <i data-lucide="code"></i>
                     Script Macros
                 </h3>
                 
                 <div class="space-y-2">
                     
                     <!-- File 1: EMS3 + Limit + Nbr.js -->
-                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
-                        <span class="text-slate-300 text-base font-mono">1. EMS3 + Limit + Nbr.js</span>
-                        <a href="EMS3 + Limit + Nbr.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
-                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                    <div class="file-row">
+                        <span>1. EMS3 + Limit + Nbr.js</span>
+                        <a href="EMS3 + Limit + Nbr.js" download class="download-btn">
+                            <i data-lucide="download"></i>
                             Download
                         </a>
                     </div>
                     
                     <!-- File 2: EMS6 + Limit6 + Nbr6.js -->
-                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
-                        <span class="text-slate-300 text-base font-mono">2. EMS6 + Limit6 + Nbr6.js</span>
-                        <a href="EMS6 + Limit6 + Nbr6.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
-                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                    <div class="file-row">
+                        <span>2. EMS6 + Limit6 + Nbr6.js</span>
+                        <a href="EMS6 + Limit6 + Nbr6.js" download class="download-btn">
+                            <i data-lucide="download"></i>
                             Download
                         </a>
                     </div>
 
                     <!-- File 3: IPS - EMS3.js -->
-                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
-                        <span class="text-slate-300 text-base font-mono">3. IPS - EMS3.js</span>
-                        <a href="IPS - EMS3.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
-                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                    <div class="file-row">
+                        <span>3. IPS - EMS3.js</span>
+                        <a href="IPS - EMS3.js" download class="download-btn">
+                            <i data-lucide="download"></i>
                             Download
                         </a>
                     </div>
                     
                     <!-- File 4: IPS - EMS6.js -->
-                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
-                        <span class="text-slate-300 text-base font-mono">4. IPS - EMS6.js</span>
-                        <a href="IPS - EMS6.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
-                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                    <div class="file-row">
+                        <span>4. IPS - EMS6.js</span>
+                        <a href="IPS - EMS6.js" download class="download-btn">
+                            <i data-lucide="download"></i>
                             Download
                         </a>
                     </div>
 
                     <!-- File 5: Selenium.js -->
-                    <div class="file-row flex items-center justify-between p-2 rounded-lg">
-                        <span class="text-slate-300 text-base font-mono">5. Selenium.js</span>
-                        <a href="Selenium.js" download class="download-btn flex items-center px-3 py-1 bg-amber-500 text-slate-900 font-semibold text-sm rounded-full shadow-lg">
-                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                    <div class="file-row">
+                        <span>5. Selenium.js</span>
+                        <a href="Selenium.js" download class="download-btn">
+                            <i data-lucide="download"></i>
                             Download
                         </a>
                     </div>
                     
                     <!-- Optional hint -->
-                    <p class="text-xs text-slate-500 pt-2 border-t border-slate-700 mt-4">
+                    <p class="file-hint">
                         (Click the download button to save the file.)
                     </p>
                 </div>
@@ -264,8 +538,7 @@
         </div>
 
         <!-- Footer Note -->
-        <footer class="mt-16 text-center text-slate-500 text-sm">
-            <!-- Updated Footer Text -->
+        <footer class="portal-footer">
             <p>By EMSW Team.</p>
         </footer>
     </div>
@@ -273,6 +546,90 @@
     <!-- Initialize Lucide Icons -->
     <script>
         lucide.createIcons();
+    </script>
+    
+    <!-- Particles.js Initialization Script -->
+    <script>
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 100, // Slightly more particles for the main hub
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#94a3b8" // Slate 400 - subtle white/blue tint
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    },
+                    "polygon": {
+                        "nb_sides": 5
+                    }
+                },
+                "opacity": {
+                    "value": 0.5,
+                    "random": false,
+                    "anim": {
+                        "enable": false,
+                    }
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                    "anim": {
+                        "enable": false,
+                    }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#475569", // Slate 600 - dark link lines
+                    "opacity": 0.4,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 1.5,
+                    "direction": "none",
+                    "random": false,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 180,
+                        "line_linked": {
+                            "opacity": 0.8
+                        }
+                    },
+                    "push": {
+                        "particles_nb": 4
+                    },
+                }
+            },
+            "retina_detect": true
+        });
     </script>
 </body>
 </html>
