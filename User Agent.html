@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User-Agent Detector</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #4CAF50, #2196F3);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        /* Container */
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 30px;
+            font-size: 1.5rem;
+        }
+
+        #userAgent {
+            margin-top: 10px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 1rem;
+            color: #000;
+            word-wrap: break-word;
+        }
+
+        /* Buttons */
+        .buttons {
+            margin-top: 20px;
+        }
+
+        button {
+            background: #FFC107;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin: 5px;
+        }
+		#copyButton {
+            background: #a63830;
+            color: #000;
+            border: none;
+            padding: 10px 15px;
+            font-size: 1rem;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #FFA000;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>User-Agent Detector</h1>
+        <div class="buttons">
+            <button onclick="getUserAgent()">Show My User-Agent</button>
+        </div>
+
+        <h2>Your User-Agent:</h2>
+        <p id="userAgent">Click the button above to reveal your User-Agent string!</p>
+		<div class="buttons">
+            <button id="copyButton" onclick="copyToClipboard()" disabled>Copy</button>
+        </div>
+    </div>
+
+    <script>
+        function getUserAgent() {
+            const userAgent = navigator.userAgent; // Retrieve User-Agent string
+            const userAgentElement = document.getElementById("userAgent");
+            userAgentElement.textContent = userAgent; // Display User-Agent
+            document.getElementById("copyButton").disabled = false; // Enable copy button
+        }
+
+        function copyToClipboard() {
+            const userAgent = document.getElementById("userAgent").textContent;
+            navigator.clipboard.writeText(userAgent).then(() => {
+                alert("User-Agent copied to clipboard!");
+            }).catch(err => {
+                console.error("Failed to copy text: ", err);
+            });
+        }
+    </script>
+
+</body>
+</html>
