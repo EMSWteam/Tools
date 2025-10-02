@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>IP Grid Exporter</title>
+<style>
+  /* ===== Regenerated Modern Look ===== */
+  :root {
+    --primary: #5a67d8; /* Indigo */
+    --primary-hover: #434190;
+    --secondary: #63b3ed; /* Light Blue */
+    --accent: #f6ad55; /* Orange */
+    --bg-light: #f7fafc;
+    --bg-dark: #edf2f7;
+    --text-color: #2d3748;
+    --border-color: #e2e8f0;
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --font: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  body {
+    font-family: var(--font);
+    background: linear-gradient(135deg, var(--bg-light), var(--bg-dark));
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    color: var(--text-color);
+  }
+
+  h2 {
+    font-size: 2.25rem; /* 36px */
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  p {
+    font-size: 1rem;
+    color: #718096;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  #container {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem; /* 16px */
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 1000px;
+  }
+
+  td {
+    border: 1px solid var(--border-color);
+    padding: 0;
+  }
+
+  input {
+    <!-- width: 100%; -->
+    height: 40px;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    font-family: monospace;
+    background-color: transparent;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 0.25rem;
+  }
+
+  input:focus {
+    outline: none;
+    background-color: rgba(99, 179, 237, 0.1);
+    box-shadow: inset 0 0 0 2px var(--secondary);
+  }
+
+  .top-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .primary-btn {
+    background-color: var(--primary);
+  }
+  .primary-btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .danger-btn {
+    background-color: #fc8181;
+  }
+  .danger-btn:hover {
+    background-color: #e53e3e;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .accent-btn {
+    background-color: var(--accent);
+  }
+  .accent-btn:hover {
+    background-color: #dd6b20;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  @media (max-width: 768px) {
+    body {
+      padding: 20px 10px;
+    }
+    h2 {
+      font-size: 1.75rem;
+    }
+    p {
+      font-size: 0.9rem;
+    }
+    button {
+      font-size: 0.9rem;
+      padding: 0.6rem 1.2rem;
+    }
+    #container {
+      padding: 1rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h2>IP Grid Exporter</h2>
+<p>Paste tab-separated IPs into any cell and export each column as a separate file.</p>
+
+<div class="top-bar">
+  <button class="primary-btn" onclick="exportColumns()">Export Columns</button>
+  <button class="danger-btn" onclick="clearGrid()">Clear All</button>
+  <button class="accent-btn" onclick="exportEms3()">Export EMS3</button>
+  <button class="accent-btn" onclick="exportEms4()">Export EMS4</button>
+  <button class="accent-btn" onclick="exportEms6()">Export EMS6</button>
+</div>
+
+<div id="container">
+  <table id="grid"></table>
+</div>
+
+<script>
+const rows = 200;
+const cols = 10;
+const grid = document.getElementById('grid');
+
+// Create editable grid
+function createGrid() {
+  for (let r = 0; r < rows; r++) {
+    const tr = document.createElement('tr');
+    for (let c = 0; c < cols; c++) {
+      const td = document.createElement('td');
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.dataset.row = r;
+      input.dataset.col = c;
+      input.addEventListener('paste', handlePaste);
+      td.appendChild(input);
+      tr.appendChild(td);
+    }
+    grid.appendChild(tr);
+  }
+}
+createGrid();
+
+// Handle paste of tabular data
+function handlePaste(e) {
+  e.preventDefault();
+  const pasteData = (e.clipboardData || window.clipboardData).getData('text');
+  if (!pasteData) return;
+
+  const startRow = parseInt(this.dataset.row);
+  const startCol = parseInt(this.dataset.col);
+  const rowsData = pasteData.split(/\r?\n/).filter(line => line.length > 0);
+
+  for (let r = 0; r < rowsData.length; r++) {
+    const cells = rowsData[r].split('\t');
+    for (let c = 0; c < cells.length; c++) {
+      const targetRow = startRow + r;
+      const targetCol = startCol + c;
+      if (targetRow < rows && targetCol < cols) {
+        const input = grid.querySelector(`input[data-row="${targetRow}"][data-col="${targetCol}"]`);
+        if (input) {
+          input.value = cells[c];
+        }
+      }
+    }
+  }
+}
+
+// Reusable function to export columns with a specific filename prefix
+function exportGridColumns(filenamePrefix, suffix = '') {
+  const colsData = Array.from({length: cols}, () => []);
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const input = grid.querySelector(`input[data-row="${r}"][data-col="${c}"]`);
+      const value = input.value.trim();
+      if (value !== "") {
+        colsData[c].push(value);
+      }
+    }
+  }
+
+  const filteredCols = colsData.filter(col => col.length > 0);
+  if (filteredCols.length === 0) {
+    alert('No data to export!');
+    return;
+  }
+
+  filteredCols.forEach((col, i) => {
+    const blob = new Blob([col.join('\n')], {type: 'text/plain'});
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${filenamePrefix}${i+1}${suffix}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+}
+
+// Export functions for each button
+function exportColumns() {
+  exportGridColumns('ips');
+}
+function exportEms3() {
+  exportGridColumns('ips', 'ems3');
+}
+function exportEms4() {
+  exportGridColumns('ips', 'ems4');
+}
+function exportEms6() {
+  exportGridColumns('ips', 'ems6');
+}
+
+// Clear all inputs in the grid
+function clearGrid() {
+  if (confirm("Are you sure you want to clear all data?")) {
+    const inputs = grid.querySelectorAll('input');
+    inputs.forEach(input => input.value = '');
+  }
+}
+</script>
+
+</body>
+</html>
