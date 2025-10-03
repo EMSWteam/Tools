@@ -371,7 +371,8 @@
             // For textareas
             if (element.tagName === 'TEXTAREA') {
                 element.select();
-                element.setSelectionRange(0, 99999); // For mobile devices
+                // FIX: Set the selection range to the exact length of the value for reliable "Copy All"
+                element.setSelectionRange(0, element.value.length); 
             }
             // For other elements like <pre>
             else {
