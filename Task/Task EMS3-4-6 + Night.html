@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Repo Range Parser Combined Time Slots</title>
+<link rel="icon" href="data:image/svg+xml;utf8,
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'>
+  <path fill='white' d='M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200z'/>
+  <path fill='white' d='M350 268h-94V142c0-6.6-5.4-12-12-12h-20c-6.6 0-12 5.4-12 12v148c0 6.6 5.4 12 12 12h126c6.6 0 12-5.4 12-12v-20c0-6.6-5.4-12-12-12z'/>
+</svg>">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(160deg, #e0e7ff, #fdf2f8, #e0f2fe);
+  color: #1a1a1a;
+  padding: 20px;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Header + Bookmarklet */
+.main-header-wrapper {
+  text-align: center;
+  margin: 20px 0 30px;
+}
+
+.bookmarklet {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(59, 130, 246, 0.85);
+  color: #fff;
+  padding: 14px 24px;
+  text-decoration: none;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+  backdrop-filter: blur(10px);
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  user-select: none;
+  cursor: grab;
+}
+
+.bookmarklet:hover {
+  background: rgba(37, 99, 235, 0.95);
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.35);
+}
+
+h2 {
+  font-weight: 700;
+  font-size: 2.5rem;
+  margin: 0 0 25px;
+  color: #1e3a8a;
+  text-align: center;
+  letter-spacing: -0.5px;
+}
+
+/* Toggle Switch */
+.toggle-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 240px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.5);
+}
+
+.toggle-btn {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #4b5563;
+  cursor: pointer;
+  z-index: 1;
+  transition: color 0.3s ease;
+}
+
+.toggle-btn.active {
+  color: #fff;
+}
+
+.toggle-slider {
+  position: absolute;
+  width: 33.33%;
+  height: 100%;
+  background: linear-gradient(135deg, #8e31e3, #f6ce3b);
+  border-radius: 22px;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+}
+
+.toggle-slider.ems3 {
+  transform: translateX(0%);
+}
+
+.toggle-slider.ems4 {
+  transform: translateX(100%);
+}
+
+.toggle-slider.ems6 {
+  transform: translateX(200%);
+}
+
+/* EMS3 Day/Night Toggle */
+#ems3Options {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(8px);
+    width: 140px;
+    margin: 15px auto;
+}
+
+#ems3Options span {
+    display: inline-block;
+    padding: 8px 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    width: 50%;
+    text-align: center;
+    color: #4b5563;
+}
+
+#ems3Options span.active {
+    color: #fff;
+    background: linear-gradient(135deg, #f6ce3b, #8e31e3);
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(246, 206, 59, 0.3);
+}
+
+
+/* Input Center */
+.input-center {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.input-center input[type=number],
+.input-center input[type=time] {
+  font-size: 1rem;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(209, 213, 219, 0.7);
+  background: rgba(255,255,255,0.8);
+  width: 130px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.input-center input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99,102,241,0.2);
+  background: #fff;
+}
+
+/* Table */
+table {
+  border-collapse: collapse;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(6px);
+  width: 90%;
+  max-width: 820px;
+  margin: 0 auto 25px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+th, td {
+  border: 1px solid #e5e7eb;
+  min-width: 15px;
+  height: 15px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 0.7rem;
+  padding: 5px 7px;
+}
+
+td[contenteditable="true"] {
+  cursor: text;
+  background: #f9fafb;
+  border-radius: 6px;
+  padding: 3px 4px;
+  transition: background 0.3s ease;
+}
+
+td[contenteditable="true"]:focus {
+  background: #fff3c4;
+  box-shadow: inset 0 0 6px #facc15;
+}
+
+/* Table Row Animation */
+#inputTable tbody tr {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeSlideIn 0.4s ease forwards;
+}
+
+#inputTable tbody tr:nth-child(1) { animation-delay: 0.05s; }
+#inputTable tbody tr:nth-child(2) { animation-delay: 0.1s; }
+#inputTable tbody tr:nth-child(3) { animation-delay: 0.15s; }
+
+@keyframes fadeSlideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Buttons */
+button {
+  background: linear-gradient(135deg, #6366f1, #3b82f6);
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+button:hover {
+  background: linear-gradient(135deg, #4f46e5, #2563eb);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+}
+
+/* EMS6 Sub-options */
+#ems6Options {
+  display: none;
+  margin: 15px 0;
+  text-align: center;
+}
+
+#ems6Options button {
+  margin: 0 10px;
+}
+
+/* Result container */
+#result {
+  width: 90%;
+  max-width: 820px;
+  background: rgba(255,255,255,0.75);
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 20px auto;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  font-family: 'Courier New', monospace;
+  font-size: 0.95rem;
+  color: #1f2937;
+  backdrop-filter: blur(10px);
+}
+
+/* Groups (result cards) */
+.group {
+  margin-bottom: 20px;
+  padding: 18px;
+  border-left: 5px solid #6366f1;
+  background: rgba(249,250,251,0.8);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  opacity: 0;
+  transform: translateY(15px);
+  animation: cardFadeIn 0.5s ease forwards;
+}
+
+.group strong {
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+@keyframes cardFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Copy button inside result */
+.copyBtn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  margin-left: 12px;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 3px 8px rgba(16, 185, 129, 0.3);
+}
+
+.copyBtn:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  box-shadow: 0 6px 14px rgba(5, 150, 105, 0.35);
+}
+
+/* Notification */
+.notification {
+  position: fixed;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #10b981;
+  color: #fff;
+  padding: 14px 24px;
+  border-radius: 12px;
+  z-index: 1000;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: bottom 0.4s ease-in-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 320px;
+}
+
+.notification.show {
+  bottom: 24px;
+}
+</style>
+</head>
+<body>
+<div class="main-header-wrapper">
+  <a
+    href="javascript:(function(){    const input = prompt('Paste formatted data (REPO, ranges, Count, Limit, Date):');    if (!input) return;    const lines = input.split('\n').map(l => l.trim()).filter(Boolean);    let currentRepo = '', repoData = {}, repoCount = {}, repoLimit = {}, dateRange = '';    const firstLine = lines[0];    lines.forEach(line => {        if (/^[A-Za-z0-9_]+$/.test(line) && !/Count|Limit/i.test(line)) {            currentRepo = line;            if (!repoData[currentRepo]) repoData[currentRepo] = [];            return;        }        const rangeMatch = line.match(/^(\d+)\s+to\s+(\d+)$/i);        if (rangeMatch) {            const start = parseInt(rangeMatch[1], 10);            const end = parseInt(rangeMatch[2], 10);            for (let i = start; i <= end; i++) {                repoData[currentRepo].push(i);            }        }        const countMatch = line.match(/^Count\s+(\d+)/i);        if (countMatch && currentRepo) {            repoCount[currentRepo] = countMatch[1];
+        }        const limitMatch = line.match(/^Limit\s+(\d+)/i);        if (limitMatch && currentRepo) {            repoLimit[currentRepo] = limitMatch[1];
+        }        if (/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\s+to\s+\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(line)) {            dateRange = line;
+        }    });    const textareas = {        'REPO': document.getElementById('task_list_profiles_488') || document.getElementById('task_list_profiles_196') || document.getElementById('task_list_profiles_200'),        'REPO1': document.getElementById('task_list_profiles_489') || document.getElementById('task_list_profiles_540') || document.getElementById('task_list_profiles_450'),        'REPO2': document.getElementById('task_list_profiles_491') || document.getElementById('task_list_profiles_530'),        'REPO3': document.getElementById('task_list_profiles_492') || document.getElementById('task_list_profiles_559'),    };    Object.keys(repoData).forEach(repo => {        const textarea = textareas[repo];        if (textarea) {            textarea.value = repoData[repo].join('\n');            textarea.dispatchEvent(new Event('input',{bubbles:true}));            textarea.dispatchEvent(new Event('change',{bubbles:true}));
+        }    });    function fillCount(repoName,count){        const rows=document.querySelectorAll('tr');        rows.forEach(row=>{            if(new RegExp(`\\b${repoName}\\b`,'i').test(row.innerText)){                const countInput=row.querySelector('input.schedule_range_count');                if(countInput){                    countInput.value=count;                    countInput.dispatchEvent(new Event('input',{bubbles:true}));                    countInput.dispatchEvent(new Event('change',{bubbles:true}));
+                }            }        });    }    Object.keys(repoCount).forEach(repo=>{fillCount(repo,repoCount[repo]);});    function fillLimit(repoName,limit){        const rows=document.querySelectorAll('tr');        rows.forEach(row=>{            if(new RegExp(`\\b${repoName}\\b`,'i').test(row.innerText)){                const limitInput=row.querySelector('input.schedule_range_to');                if(limitInput){                    limitInput.value=limit;                    limitInput.dispatchEvent(new Event('input',{bubbles:true}));                    limitInput.dispatchEvent(new Event('change',{bubbles:true}));
+                }            }        });    }    Object.keys(repoLimit).forEach(repo=>{fillLimit(repo,repoLimit[repo]);});    const incrementCheckbox=document.getElementById('increment');    if(incrementCheckbox&&!incrementCheckbox.checked){        incrementCheckbox.checked=true;        incrementCheckbox.dispatchEvent(new Event('change',{bubbles:true}));
+    }    if(dateRange){        const parts=dateRange.split(' to ');        const from=document.getElementById('lifetime_from');        const to=document.getElementById('lifetime_to');        if(from){            from.value=parts[0];            from.dispatchEvent(new Event('input',{bubbles:true}));            from.dispatchEvent(new Event('change',{bubbles:true}));
+        }        if(to){            to.value=parts[1];            to.dispatchEvent(new Event('input',{bubbles:true}));            to.dispatchEvent(new Event('change',{bubbles:true}));
+        }    }    const filledRepos=Object.keys(repoData).filter(repo=>{        const textarea=textareas[repo];        return textarea&&textarea.value.trim().length>0;
+    });    const taskNameInput=document.getElementById('task_name');    if(taskNameInput&&filledRepos.length>0){        taskNameInput.value=firstLine+': '+filledRepos.join(' + ');        taskNameInput.dispatchEvent(new Event('input',{bubbles:true}));        taskNameInput.dispatchEvent(new Event('change',{bubbles:true}));
+    }})();"
+    class="bookmarklet"
+    title="Drag This to Bookmarks Bar"
+  >
+    📌 Drag to Bookmarks
+  </a>
+</div>
+
+<h2>Paste your Excel/Google Sheets data</h2>
+
+<div class="toggle-wrapper">
+  <div class="toggle-switch">
+    <span id="ems3Btn" class="toggle-btn active">EMS3</span>
+    <span id="ems4Btn" class="toggle-btn">EMS4</span>
+    <span id="ems6Btn" class="toggle-btn">EMS6</span>
+    <div class="toggle-slider ems3"></div>
+  </div>
+</div>
+
+<div id="ems3Options">
+  <span id="ems3DayBtn" class="active">Day</span>
+  <span id="ems3NightBtn">Night</span>
+</div>
+
+<div id="ems6Options" style="display:none; margin:15px 0; text-align:center;">
+  <button id="ems6Option1">Repo + Repo1</button>
+  <button id="ems6Option2">Repo2 + Repo3</button>
+</div>
+
+<div class="input-center">
+  <input type="number" id="stepInput" min="1" value="30" />
+  <input type="time" id="startTime" value="11:00" />
+</div>
+
+<table id="inputTable" contenteditable="true">
+  <tbody>
+    <tr><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td></tr>
+  </tbody>
+</table>
+
+<button onclick="parseData()">Parse Data</button>
+
+<div id="result"></div>
+
+<script>
+/* --- Toggle Logic --- */
+const stepInput = document.getElementById('stepInput');
+const startTimeInput = document.getElementById('startTime');
+const ems3Btn = document.getElementById('ems3Btn');
+const ems4Btn = document.getElementById('ems4Btn');
+const ems6Btn = document.getElementById('ems6Btn');
+const toggleSlider = document.querySelector('.toggle-slider');
+const ems3Options = document.getElementById('ems3Options');
+const ems3DayBtn = document.getElementById('ems3DayBtn');
+const ems3NightBtn = document.getElementById('ems3NightBtn');
+const ems6Options = document.getElementById('ems6Options');
+const ems6Option1 = document.getElementById('ems6Option1');
+const ems6Option2 = document.getElementById('ems6Option2');
+
+function setToggleState(activeBtn, sliderClass) {
+  ems3Btn.classList.remove('active');
+  ems4Btn.classList.remove('active');
+  ems6Btn.classList.remove('active');
+  toggleSlider.classList.remove('ems3', 'ems4', 'ems6');
+  
+  activeBtn.classList.add('active');
+  toggleSlider.classList.add(sliderClass);
+}
+
+function updateEms3Mode(isDay) {
+  ems3DayBtn.classList.toggle('active', isDay);
+  ems3NightBtn.classList.toggle('active', !isDay);
+  startTimeInput.value = isDay ? "11:00" : "01:00";
+  stepInput.value = isDay ? "30" : "42"; // Change step to 42 for night mode
+}
+
+ems3Btn.addEventListener('click', () => {
+  setToggleState(ems3Btn, 'ems3');
+  ems3Options.style.display = "flex";
+  ems6Options.style.display = "none";
+  updateEms3Mode(ems3DayBtn.classList.contains('active'));
+});
+
+ems4Btn.addEventListener('click', () => {
+  setToggleState(ems4Btn, 'ems4');
+  stepInput.value = 20;
+  startTimeInput.value = "12:05";
+  ems3Options.style.display = "none";
+  ems6Options.style.display = "none";
+});
+
+ems6Btn.addEventListener('click', () => {
+  setToggleState(ems6Btn, 'ems6');
+  stepInput.value = "";
+  startTimeInput.value = "11:00";
+  ems3Options.style.display = "none";
+  ems6Options.style.display = "block";
+});
+
+ems3DayBtn.addEventListener('click', () => {
+  updateEms3Mode(true);
+});
+
+ems3NightBtn.addEventListener('click', () => {
+  updateEms3Mode(false);
+});
+
+// Initial state
+updateEms3Mode(true);
+
+
+// EMS6 Sub-options
+ems6Option1.addEventListener('click', () => {
+  stepInput.value = 13;
+  showNotification("EMS6 → Repo + Repo1 → Step = 13");
+});
+
+ems6Option2.addEventListener('click', () => {
+  stepInput.value = 12;
+  showNotification("EMS6 → Repo2 + Repo3 → Step = 12");
+});
+
+/* --- Paste Handling --- */
+const table = document.getElementById('inputTable');
+
+table.addEventListener('paste', (event) => {
+  event.preventDefault();
+  const clipboardData = event.clipboardData;
+  const htmlData = clipboardData.getData('text/html');
+  const plainText = clipboardData.getData('text/plain');
+
+  if (htmlData) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlData, 'text/html');
+    const clipboardTable = doc.querySelector('table');
+    if (clipboardTable) {
+      pasteHtmlTable(clipboardTable);
+      return;
+    }
+  }
+  pastePlainText(plainText);
+});
+
+function pasteHtmlTable(clipboardTable) {
+  const tbody = table.querySelector('tbody');
+  tbody.innerHTML = '';
+
+  clipboardTable.querySelectorAll('tr').forEach(tr => {
+    const newRow = document.createElement('tr');
+    tr.querySelectorAll('td,th').forEach(cell => {
+      const newCell = document.createElement('td');
+      newCell.contentEditable = "true";
+      newCell.innerHTML = cell.innerHTML;
+
+      if (cell.hasAttribute('colspan')) {
+        newCell.setAttribute('colspan', cell.getAttribute('colspan'));
+      }
+      if (cell.hasAttribute('rowspan')) {
+        newCell.setAttribute('rowspan', cell.getAttribute('rowspan'));
+      }
+
+      newRow.appendChild(newCell);
+    });
+    tbody.appendChild(newRow);
+  });
+}
+
+function pastePlainText(text) {
+  const rows = text.split('\n').filter(r => r.trim() !== '');
+  const tbody = table.querySelector('tbody');
+  tbody.innerHTML = '';
+  rows.forEach(rowText => {
+    const row = document.createElement('tr');
+    const cells = rowText.split('\t');
+    cells.forEach(cellText => {
+      const td = document.createElement('td');
+      td.contentEditable = "true";
+      td.textContent = cellText;
+      row.appendChild(td);
+    });
+    tbody.appendChild(row);
+  });
+}
+
+/* --- Notification --- */
+function showNotification(message) {
+  const notification = document.createElement('div');
+  notification.className = 'notification';
+  notification.textContent = message;
+  document.body.appendChild(notification);
+
+  setTimeout(() => {
+    notification.classList.add('show');
+    const rect = notification.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    for (let i = 0; i < 60; i++) {
+      const confetti = document.createElement('div');
+      const angle = Math.random() * 360;
+      const distance = Math.random() * 80 + 40;
+      confetti.style.position = 'fixed';
+      confetti.style.top = `${centerY}px`;
+      confetti.style.left = `${centerX}px`;
+      confetti.style.width = '1px';
+      confetti.style.height = '8px';
+      confetti.style.backgroundColor = `hsl(${Math.random()*100+100}, 70%, 50%)`;
+      confetti.style.borderRadius = '50%';
+      confetti.style.zIndex = '10000';
+      confetti.style.transform = `translate(${distance*Math.cos(angle)}px, ${distance*Math.sin(angle)}px)`;
+      confetti.style.opacity = 1;
+      confetti.style.transition = 'transform 1s ease-out, opacity 1s ease-out';
+      document.body.appendChild(confetti);
+      setTimeout(() => {
+        confetti.style.transform = `translate(${distance*2*Math.cos(angle)}px, ${distance*2*Math.sin(angle)}px)`;
+        confetti.style.opacity = 0;
+      }, 100);
+      setTimeout(() => confetti.remove(), 2000);
+    }
+  }, 50);
+
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => notification.remove(), 400);
+  }, 3000);
+}
+
+function parseData() {
+  const stepInput = document.getElementById('stepInput');
+  const startTimeInput = document.getElementById('startTime');
+
+  let step = parseInt(stepInput.value, 10);
+  if (isNaN(step) || step <= 0) {
+    alert('Please enter a valid positive step value!');
+    stepInput.focus();
+    return;
+  }
+
+  const [startHour, startMin] = startTimeInput.value.split(':').map(n => parseInt(n, 10));
+
+  const rows = Array.from(table.querySelectorAll('tbody tr')).map(tr =>
+    Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim())
+  );
+
+  if (rows.length === 0 || rows[0].length === 0 || rows[0].every(c => c === '')) {
+    alert('Please paste your data first!');
+    return;
+  }
+
+  const lines = rows.map(r => r.join('\t'));
+  const firstLineCols = lines[0].split(/\t+/).filter(Boolean);
+  const repoNames = [];
+  const repoRanges = [];
+
+  for (let i = 0; i < firstLineCols.length; i += 2) {
+    const rawName = firstLineCols[i].trim();
+    const match = rawName.match(/"(.*?)"/);
+    repoNames.push(match ? match[1] : rawName);
+    repoRanges.push([]);
+  }
+
+  for (let i = 2; i < lines.length; i++) {
+    const cols = lines[i].split(/\t+/).filter(Boolean);
+    for (let r = 0; r < repoNames.length; r++) {
+      const start = parseInt(cols[r*3], 10);
+      const end = parseInt(cols[r*3 + 1], 10);
+      if (!isNaN(start) && !isNaN(end)) {
+        repoRanges[r].push({ start, end });
+      }
+    }
+  }
+
+  function mergeAndSplit(ranges) {
+    let groups = [];
+    let currentGroup = [];
+    ranges.forEach(({start, end}) => {
+      if (start === 1 && currentGroup.length) {
+        groups.push(currentGroup);
+        currentGroup = [];
+      }
+      if (currentGroup.length === 0) {
+        currentGroup.push({start, end});
+      } else {
+        const last = currentGroup[currentGroup.length - 1];
+        if (start <= last.end + 1) {
+          last.end = Math.max(last.end, end);
+        } else {
+          currentGroup.push({start, end});
+        }
+      }
+    });
+    if (currentGroup.length) groups.push(currentGroup);
+    return groups;
+  }
+
+  function formatDateTime(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2,'0');
+    const d = String(date.getDate()).padStart(2,'0');
+    const hh = String(date.getHours()).padStart(2,'0');
+    const mm = String(date.getMinutes()).padStart(2,'0');
+    const ss = String(date.getSeconds()).padStart(2,'0');
+    return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+  }
+
+  const now = new Date();
+  const baseDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // Add this new section for EMS3 night mode
+  const isEms3Night = document.getElementById('ems3NightBtn').classList.contains('active');
+  if (isEms3Night) {
+    baseDate.setDate(baseDate.getDate() + 1);
+  }
+  // End of new section
+
+  const repoGroups = [];
+
+  repoNames.forEach((repo, idx) => {
+    const groups = mergeAndSplit(repoRanges[idx]);
+    let hour = startHour;
+    let minute = startMin;
+
+    repoGroups[idx] = groups.map(group => {
+      const minStart = Math.min(...group.map(r => r.start));
+      const maxEnd = Math.max(...group.map(r => r.end));
+      let countSum = 0;
+      group.forEach(r => {
+        countSum += Math.ceil((r.end - r.start + 1) / step);
+      });
+
+      const startTime = new Date(baseDate);
+      startTime.setHours(hour, minute, 0, 0);
+
+      const endTime = new Date(startTime);
+      endTime.setHours(endTime.getHours() + countSum);
+
+      hour += countSum;
+
+      return {ranges: group, count: countSum, minStart, maxEnd, startTime, endTime};
+    });
+  });
+
+  const combinedMap = new Map();
+
+  repoGroups.forEach((groups, repoIdx) => {
+    groups.forEach(group => {
+      const key = formatDateTime(group.startTime) + "|" + formatDateTime(group.endTime);
+      if (!combinedMap.has(key)) combinedMap.set(key, []);
+      combinedMap.get(key).push({
+        repo: repoNames[repoIdx],
+        minStart: group.minStart,
+        maxEnd: group.maxEnd,
+        count: group.count
+      });
+    });
+  });
+
+  // Determine active EMS mode
+  let activeEms = 'EMS3';
+  if (ems4Btn.classList.contains('active')) {
+    activeEms = 'EMS4';
+  } else if (ems6Btn.classList.contains('active')) {
+    activeEms = 'EMS6';
+  }
+
+  let html = "";
+  combinedMap.forEach((repos, key) => {
+    const [startTime, endTime] = key.split("|");
+    html += `<div class="group">`;
+
+    repos.forEach((r, i) => {
+      html += `<strong>${r.repo}</strong>: ${r.minStart} to ${r.maxEnd}`;
+      if (i < repos.length -1) html += " &nbsp;&nbsp;&nbsp; ";
+    });
+
+    html += `<br>`;
+    repos.forEach(r => {
+      html += `Count: ${r.count}<br>`;
+      html += `Limit: ${step}<br>`;
+    });
+    html += `${startTime} to ${endTime} &nbsp;&nbsp;`;
+
+    let copyText = `${activeEms}\n`;
+    repos.forEach(r => {
+      copyText += `${r.repo}\n${r.minStart} to ${r.maxEnd}\n` +
+                  `Count ${r.count}\nLimit ${step}\n`;
+    });
+    copyText += `${startTime} to ${endTime}`;
+
+    const copyId = "copy_" + Math.random().toString(36).substr(2,9);
+    html += `<button class="copyBtn" data-copyid="${copyId}">Copy Expanded</button>`;
+
+    setTimeout(() => {
+      const btn = document.querySelector(`button[data-copyid='${copyId}']`);
+      if (btn) {
+        btn.onclick = () => {
+          navigator.clipboard.writeText(copyText).then(() => {
+            showNotification('Copied Successfully!');
+          });
+        };
+      }
+    }, 10);
+
+    html += `</div>`;
+  });
+
+  document.getElementById("result").innerHTML = html;
+}
+</script>
+
+</body>
+</html>
