@@ -391,10 +391,11 @@
             }
         }
 
-        /* Shortcut Card Base Styles (Remaining custom styles are preserved) */
+        /* Shortcut Card Base Styles (Modified to use flex for vertical alignment) */
         .shortcut-card {
-            /* Treat link as a block */
-            display: block;
+            /* CRITICAL FIX 1: Treat link as a flex container, set to column for vertical layout */
+            display: flex;
+            flex-direction: column; 
             /* Inner padding */
             padding: 2rem;
             /* Rounded corners */
@@ -475,6 +476,8 @@
             align-items: flex-start;
             /* Spacing between items */
             row-gap: 1rem;
+            /* CRITICAL FIX 2: Ensure content wrapper takes full height of the card */
+            height: 100%;
         }
         .card-icon-wrapper {
             /* Padding for the circular icon background */
@@ -503,8 +506,8 @@
             /* Flex for alignment with arrow icon */
             display: flex;
             align-items: center;
-            /* Top margin for separation */
-            margin-top: 1rem;
+            /* CRITICAL FIX 3: Push the link to the bottom by taking all available space */
+            margin-top: auto;
         }
         .card-link-text i {
             /* Icon size */
