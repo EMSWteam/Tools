@@ -472,11 +472,12 @@
             /* Flex layout for content inside the card */
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: center;
             /* Spacing between items */
             row-gap: 1rem;
             /* CRITICAL FIX 2: Ensure content wrapper takes full height of the card */
             height: 100%;
+			text-align: center;
         }
         .card-icon-wrapper {
             /* Padding for the circular icon background */
@@ -637,6 +638,7 @@
             /* Flex layout for icon and text */
             display: flex;
             align-items: center;
+			justify-content: center;
         }
         .script-macros-box h3 i {
             /* Icon size */
