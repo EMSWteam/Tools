@@ -4,23 +4,28 @@
 
 // First and last tab number to process
 var START_TAB = 2;
-var END_TAB   = 3;
+var END_TAB   = 2; 
 var batch = 0;                       // Batch size
 var delay = 0;                    // Delay in milliseconds
-// File mapping for deployment. Note that the original prompt is a bit
-// ambiguous about the exact sequence, but this configuration assumes a simple
-// rotation between the two secondary files on tab 3.
+
+// === NEW CONFIGURATION VARIABLE ===
+// Set to 'false' to work only with '6k.txt' (Tab 2)
+// Set to 'true' to work with '6k.txt' (Tab 2) AND alternate 'part1.txt'/'part2.txt' (Tab 3)
+var ENABLE_TAB3_DEPLOYMENT = false; 
+// ==================================
+
+// File mapping for deployment.
 var files = [
     null,         // Unused
     null,         // tab 1 (unused)
-    "6k.txt",     // tab 2
-    "part1.txt",  // tab 3 (will alternate with 3k500(2).txt)
-    "part2.txt" // Used for alternating deployments
+    "6k.txt",     // tab 2 (Always enabled)
+    "part1.txt",  // tab 3 file 1
+    "part2.txt"   // tab 3 file 2
 ];
 
 var deployFiles = [
-    {tab2: files[2], tab3: files[3]},
-    {tab2: files[2], tab3: files[4]}
+    {tab2: files[2], tab3: files[3]}, // Set 1: tab2 uses 6k.txt, tab3 uses part1.txt
+    {tab2: files[2], tab3: files[4]}  // Set 2: tab2 uses 6k.txt, tab3 uses part2.txt
 ];
 
 // Hour Configuration for deployment
@@ -38,6 +43,8 @@ var M_m = parseInt(prompt("Enter a Minute (M_m) for the Launch At time:", defaul
 
 // HELPER: Read all lines until #EANF#
 function GetAllLines(file) {
+    if (!file) return ""; // Return empty string if no file is provided
+
     var list = [];
     var i = 1;
 
@@ -116,7 +123,7 @@ for (var i = 0; i < hours.length; i++) {
     var launchAt = getDynamicLaunchAt(i);
     var macro = initGlobal;
 
-    // Process Tab 2
+    // Process Tab 2 (ALWAYS RUNS with 6k.txt)
     var fileTab2 = currentDeploySet.tab2;
     var ipsContentTab2 = GetAllLines(fileTab2);
     macro += "TAB T=2\n";
@@ -131,20 +138,22 @@ for (var i = 0; i < hours.length; i++) {
     macro += "TAG POS=1 TYPE=BUTTON FORM=ID:deploy-form ATTR=TYPE:submit&&CLASS:btn<SP>btn-default<SP>submit&&DATA-ACTION-TYPE:test_ips&&VALUE:test_ips&&NAME:action_type\n";
     macro += "wait seconds=2\n";
 
-    // Process Tab 3
-    var fileTab3 = currentDeploySet.tab3;
-    var ipsContentTab3 = GetAllLines(fileTab3);
-    macro += "TAB T=3\n";
-    macro += 'TAG POS=1 TYPE=INPUT:TEXT FORM=ID:deploy-form ATTR=ID:rcpt_to CONTENT="' + ipsContentTab3 + '"\n';
-    macro += "TAG POS=21 TYPE=SPAN ATTR=CLASS:bootstrap-switch-handle-off<SP>bootstrap-switch-danger&&TXT:No\n";
-    macro += "wait seconds=1\n";
-    macro += 'TAG POS=1 TYPE=INPUT:TEXT FORM=ID:deploy-form ATTR=PLACEHOLDER:Launch<SP>At&&NAME:launch_at CONTENT=' + launchAt + '\n';
-    macro += "wait seconds=1\n";
-    macro += "TAG POS=1 TYPE=INPUT:NUMBER FORM=ID:deploy-form ATTR=ID:batch&&NAME:system_speed[batch] CONTENT=" + batch + "\n";
-    macro += "TAG POS=1 TYPE=INPUT:NUMBER FORM=ID:deploy-form ATTR=ID:delay&&NAME:system_speed[delay] CONTENT=" + delay + "\n";
-	macro += "TAG POS=1 TYPE=SELECT FORM=ID:deploy-form ATTR=ID:send_mode&&NAME:send_mode CONTENT=%non_blocking\n";
-    macro += "TAG POS=1 TYPE=BUTTON FORM=ID:deploy-form ATTR=TYPE:submit&&CLASS:btn<SP>btn-default<SP>submit&&DATA-ACTION-TYPE:test_ips&&VALUE:test_ips&&NAME:action_type\n";
-    macro += "wait seconds=2\n";
+    // Process Tab 3 (CONDITIONAL DEPLOYMENT)
+    if (ENABLE_TAB3_DEPLOYMENT) {
+        var fileTab3 = currentDeploySet.tab3;
+        var ipsContentTab3 = GetAllLines(fileTab3);
+        macro += "TAB T=3\n";
+        macro += 'TAG POS=1 TYPE=INPUT:TEXT FORM=ID:deploy-form ATTR=ID:rcpt_to CONTENT="' + ipsContentTab3 + '"\n';
+        macro += "TAG POS=21 TYPE=SPAN ATTR=CLASS:bootstrap-switch-handle-off<SP>bootstrap-switch-danger&&TXT:No\n";
+        macro += "wait seconds=1\n";
+        macro += 'TAG POS=1 TYPE=INPUT:TEXT FORM=ID:deploy-form ATTR=PLACEHOLDER:Launch<SP>At&&NAME:launch_at CONTENT=' + launchAt + '\n';
+        macro += "wait seconds=1\n";
+        macro += "TAG POS=1 TYPE=INPUT:NUMBER FORM=ID:deploy-form ATTR=ID:batch&&NAME:system_speed[batch] CONTENT=" + batch + "\n";
+        macro += "TAG POS=1 TYPE=INPUT:NUMBER FORM=ID:deploy-form ATTR=ID:delay&&NAME:system_speed[delay] CONTENT=" + delay + "\n";
+        macro += "TAG POS=1 TYPE=SELECT FORM=ID:deploy-form ATTR=ID:send_mode&&NAME:send_mode CONTENT=%non_blocking\n";
+        macro += "TAG POS=1 TYPE=BUTTON FORM=ID:deploy-form ATTR=TYPE:submit&&CLASS:btn<SP>btn-default<SP>submit&&DATA-ACTION-TYPE:test_ips&&VALUE:test_ips&&NAME:action_type\n";
+        macro += "wait seconds=2\n";
+    }
 
     macro += "TAB T=1\n";
     macro += "WAIT SECONDS=2\n";
