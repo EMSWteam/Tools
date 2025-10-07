@@ -234,7 +234,7 @@ pre { white-space: pre-wrap; font-family: monospace; }
 <div id="scheduler" class="tab-content">
     <div class="tool-card scheduler">
         <h1>ID Pairing Scheduler</h1>
-        <p class="description">Pair IDs and assign a schedule based on start time, one pair per minute increment.</p>
+        <p class="description">Pair IDs and assign a schedule based on start time, one pair per hour increment.</p>
         <textarea id="schedulerInputIds" placeholder="101145741&#10;101145734&#10;101145750"></textarea>
         <div class="actions-group" style="margin-top:1rem;">
             <input type="number" id="schedulerStartHour" min="0" max="23" value="16">
@@ -371,7 +371,7 @@ document.getElementById('extractorDownloadTxtButton').onclick=()=>{
  for(const l in finalGroupedEmailsData){const content=finalGroupedEmailsData[l].join('\n');downloadFile(content,`${l}.txt`);}
 }
 
-/* === TOOL 2 === */
+/* === TOOL 2: Filtered XLSX Extractor === */
 function readExcelFile(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>{try{const data=new Uint8Array(e.target.result);const wb=XLSX.read(data,{type:'array'});res(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));}catch(err){rej(err);}};r.readAsArrayBuffer(file);});}
 function findEmailsInRow(row){const re=/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;const s=new Set();for(const c of row){const m=String(c||'').match(re);if(m)m.forEach(x=>s.add(x.toLowerCase()));}return Array.from(s);}
 document.getElementById('filteredParseBtn').onclick=async()=>{
@@ -441,6 +441,10 @@ document.getElementById('filteredExportBtn').onclick = () => {
 let combinatorFetchedNames = [];
 
 async function fetchRandomNames(count) {
+    const downloadBtn = document.getElementById('combinatorDownloadCsvBtn');
+    const originalText = downloadBtn.textContent;
+    downloadBtn.disabled = true;
+    downloadBtn.textContent = 'Loading...';
     try {
         const response = await fetch(
             `https://randomuser.me/api/?nat=us&results=${count}&inc=name`
@@ -453,6 +457,9 @@ async function fetchRandomNames(count) {
     } catch (e) {
         // Fallback for API failure
         combinatorFetchedNames = [{first: "John", last: "Doe"}, {first: "Jane", last: "Smith"}];
+    } finally {
+        downloadBtn.disabled = false;
+        downloadBtn.textContent = originalText;
     }
 }
 
@@ -491,6 +498,7 @@ document.getElementById('combinatorCopyBtn').onclick = () => {
     );
 };
 
+// MODIFIED CSV DOWNLOAD LOGIC
 document.getElementById('combinatorDownloadCsvBtn').onclick = async () => {
     const emails = document
         .getElementById('combinatorOutputArea')
@@ -502,27 +510,46 @@ document.getElementById('combinatorDownloadCsvBtn').onclick = async () => {
         await fetchRandomNames(emails.length);
     }
 
-    const csvHeader =
-        'First Name;Last Name;Email\n';
-    const shuffled = [...combinatorFetchedNames].sort(() => Math.random() - 0.5);
+    if (combinatorFetchedNames.length === 0) {
+        console.error('Cannot download CSV. Failed to get names.');
+        return;
+    }
 
-    const rows = emails.map((e, i) => {
-        const n = shuffled[i % shuffled.length];
-        return `${csvEscape(n.first)};${csvEscape(n.last)};${csvEscape(e)}`;
+    // New CSV Header (34 columns, same as Email Combinator.html)
+    const csvHeader = "First Name;Middle Name;Last Name;Company;Job Title;Email;Home Email;Work Email;Phone;Home;Work;Pager;Fax;Mobile;Other;Home Address;Home City;Home State;Home ZIP;Home Country;Work Address;Work City;Work State;Work ZIP;Work Country;Other Street;Other City;Other State;Zip Code;Other Country;Birthday;Anniversary;Notes;website\n";
+    
+    // Shuffle the fetched names
+    const shuffledNames = [...combinatorFetchedNames].sort(() => 0.5 - Math.random());
+    
+    const csvRows = emails.map((email, index) => {
+        const nameIndex = index % shuffledNames.length;
+        const name = shuffledNames[nameIndex];
+        const firstName = name.first;
+        const lastName = name.last;
+        
+        // CSV Row Content: Place First Name (Col 1), Last Name (Col 3), Email (Col 6)
+        // This is 5 empty columns before the Email, and 28 empty columns after (to fill the 34 total columns)
+        return `${csvEscape(firstName)};;${csvEscape(lastName)};;;${csvEscape(email)};;;;;;;;;;;;;;;;;;;;;;;;;;;;`;
     });
 
-    downloadFile(csvHeader + rows.join('\n'), 'emails.csv');
+    const csvContent = csvHeader + csvRows.join('\n');
+    
+    // Filename change: 'emails.csv' to '1.csv'
+    downloadFile(csvContent, '1.csv'); 
 };
 
-/* === TOOL 4: Scheduler === */
+
+/* === TOOL 4: Scheduler (MODIFIED FOR HOURLY INCREMENT) === */
 function pad2(n) { return String(n).padStart(2, '0'); }
 
 function generateSchedulerText(ids, startHour, startMinute) {
     const lines = ['REPO LOOP SELENIUM : DONE', ''];
     for (let i = 0; i < ids.length; i += 2) {
-        const totalMinutes = startHour * 60 + startMinute + i / 2;
+        // Calculation changed: i/2 gives the pair index (0, 1, 2, ...). 
+        // Multiplying by 60 adds 60 minutes (1 hour) for each pair.
+        const totalMinutes = startHour * 60 + startMinute + (i / 2) * 60; 
         const hour = Math.floor(totalMinutes / 60) % 24;
-        const minute = totalMinutes % 60;
+        const minute = totalMinutes % 60; // Minute remains the same (startMinute)
         const a = ids[i];
         const b = ids[i + 1];
         lines.push(`${pad2(hour)}h${pad2(minute)} : ${a}${b ? ' + ' + b : ''}`);
