@@ -156,8 +156,8 @@ pre { white-space: pre-wrap; font-family: monospace; }
 
 <div class="tab-bar">
     <div class="tab-button active" data-tab="extractor">Multi-File Extractor</div>
-    <div class="tab-button" data-tab="filtered">Filtered XLSX Extractor</div>
     <div class="tab-button" data-tab="combinator">Email Combinator</div>
+    <div class="tab-button" data-tab="filtered">Filtered XLSX Extractor</div>
     <div class="tab-button" data-tab="scheduler">ID Scheduler</div>
 </div>
 
@@ -177,6 +177,31 @@ pre { white-space: pre-wrap; font-family: monospace; }
                 <button id="extractorDownloadTxtButton" class="btn btn-success">Download TXT</button>
             </div>
             <div id="emailListsContainer"></div>
+        </div>
+    </div>
+</div>
+
+<div id="combinator" class="tab-content">
+    <div class="tool-card">
+        <h1>Email Combinator</h1>
+        <p class="description">Combine usernames and domains to generate email addresses, plus manual ones.</p>
+        <div class="input-group">
+            <label class="input-label">Usernames (semicolon-separated):</label>
+            <input id="combinatorUsernameInput" type="text" placeholder="support; sales; info" />
+            <label class="input-label">Domains (one per line):</label>
+            <textarea id="combinatorDomainInput" placeholder="gmail.com&#10;outlook.com"></textarea>
+            <label class="input-label">Manual Emails:</label>
+            <textarea id="combinatorManualEmailInput" placeholder="john@example.com&#10;jane@test.net"></textarea>
+        </div>
+        <div class="actions-group">
+            <button id="combinatorGenerateBtn" class="btn btn-primary">Generate</button>
+            <button id="combinatorDownloadCsvBtn" class="btn btn-secondary">Download CSV</button>
+        </div>
+        <div class="output-section">
+            <textarea id="combinatorOutputArea" readonly placeholder="Emails will appear here..."></textarea>
+            <div class="actions-group">
+                <button id="combinatorCopyBtn" class="btn btn-secondary">Copy All</button>
+            </div>
         </div>
     </div>
 </div>
@@ -203,31 +228,6 @@ pre { white-space: pre-wrap; font-family: monospace; }
             <input type="number" id="filteredSplitLines" value="5000" min="1">
         </div>
         <div id="filteredExportStatus" style="margin-top:10px;"></div>
-    </div>
-</div>
-
-<div id="combinator" class="tab-content">
-    <div class="tool-card">
-        <h1>Email Combinator</h1>
-        <p class="description">Combine usernames and domains to generate email addresses, plus manual ones.</p>
-        <div class="input-group">
-            <label class="input-label">Usernames (semicolon-separated):</label>
-            <input id="combinatorUsernameInput" type="text" placeholder="support; sales; info" />
-            <label class="input-label">Domains (one per line):</label>
-            <textarea id="combinatorDomainInput" placeholder="gmail.com&#10;outlook.com"></textarea>
-            <label class="input-label">Manual Emails:</label>
-            <textarea id="combinatorManualEmailInput" placeholder="john@example.com&#10;jane@test.net"></textarea>
-        </div>
-        <div class="actions-group">
-            <button id="combinatorGenerateBtn" class="btn btn-primary">Generate</button>
-            <button id="combinatorDownloadCsvBtn" class="btn btn-secondary">Download CSV</button>
-        </div>
-        <div class="output-section">
-            <textarea id="combinatorOutputArea" readonly placeholder="Emails will appear here..."></textarea>
-            <div class="actions-group">
-                <button id="combinatorCopyBtn" class="btn btn-secondary">Copy All</button>
-            </div>
-        </div>
     </div>
 </div>
 
