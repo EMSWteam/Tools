@@ -256,9 +256,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
 /* === TAB SWITCHING === */
 document.querySelectorAll('.tab-button').forEach(btn=>{
   btn.addEventListener('click',()=>{
+    // 1. Remove 'active' class from all buttons
     document.querySelectorAll('.tab-button').forEach(b=>b.classList.remove('active'));
+    // 2. Remove 'active' class from all content sections
     document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    // 3. Add 'active' class to the clicked button
     btn.classList.add('active');
+    // 4. Add 'active' class to the corresponding content section
     document.getElementById(btn.dataset.tab).classList.add('active');
     window.scrollTo({top:0,behavior:'smooth'});
   });
@@ -498,7 +502,6 @@ document.getElementById('combinatorCopyBtn').onclick = () => {
     );
 };
 
-// MODIFIED CSV DOWNLOAD LOGIC
 document.getElementById('combinatorDownloadCsvBtn').onclick = async () => {
     const emails = document
         .getElementById('combinatorOutputArea')
@@ -506,6 +509,7 @@ document.getElementById('combinatorDownloadCsvBtn').onclick = async () => {
         .filter(Boolean);
     if (!emails.length) return alert('Generate emails first.');
 
+    // Fetch enough random names
     if (combinatorFetchedNames.length < emails.length) {
         await fetchRandomNames(emails.length);
     }
@@ -515,10 +519,10 @@ document.getElementById('combinatorDownloadCsvBtn').onclick = async () => {
         return;
     }
 
-    // New CSV Header (34 columns, same as Email Combinator.html)
-    const csvHeader = "First Name;Middle Name;Last Name;Company;Job Title;Email;Home Email;Work Email;Phone;Home;Work;Pager;Fax;Mobile;Other;Home Address;Home City;Home State;Home ZIP;Home Country;Work Address;Work City;Work State;Work ZIP;Work Country;Other Street;Other City;Other State;Zip Code;Other Country;Birthday;Anniversary;Notes;website\n";
+    // Header requested by the user (34 columns)
+    const userCsvHeader = "First Name,Middle Name,Last Name,Company,Job Title,Email,Home Email,Work Email,Phone,Home,Work,Pager,Fax,Mobile,Other,Home Address,Home City,Home State,Home ZIP,Home Country,Work Address,Work City,Work State,Work ZIP,Work Country,Other Street,Other City,Other State,Zip Code,Other Country,Birthday,Anniversary,Notes,website\n";
     
-    // Shuffle the fetched names
+    // Shuffle the fetched names to assign a random name to each email
     const shuffledNames = [...combinatorFetchedNames].sort(() => 0.5 - Math.random());
     
     const csvRows = emails.map((email, index) => {
@@ -527,14 +531,25 @@ document.getElementById('combinatorDownloadCsvBtn').onclick = async () => {
         const firstName = name.first;
         const lastName = name.last;
         
-        // CSV Row Content: Place First Name (Col 1), Last Name (Col 3), Email (Col 6)
-        // This is 5 empty columns before the Email, and 28 empty columns after (to fill the 34 total columns)
-        return `${csvEscape(firstName)};;${csvEscape(lastName)};;;${csvEscape(email)};;;;;;;;;;;;;;;;;;;;;;;;;;;;`;
+        // The user's requested header has 34 columns.
+        const numColumns = 34;
+        const rowArray = new Array(numColumns).fill('');
+
+        // Fill only the requested fields (WITHOUT csvEscape to remove quotes):
+        // First Name (0)
+        rowArray[0] = firstName;     
+        // Last Name (2)
+        rowArray[2] = lastName;      
+        // Email (5)
+        rowArray[5] = email;         
+
+        // Join with comma (,) as the delimiter
+        return rowArray.join(',');
     });
 
-    const csvContent = csvHeader + csvRows.join('\n');
+    const csvContent = userCsvHeader + csvRows.join('\n');
     
-    // Filename change: 'emails.csv' to '1.csv'
+    // Download as '1.csv'
     downloadFile(csvContent, '1.csv'); 
 };
 
