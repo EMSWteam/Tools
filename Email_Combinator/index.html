@@ -223,7 +223,8 @@ pre { white-space: pre-wrap; font-family: monospace; }
                 <button id="filteredShuffleBtn" class="btn btn-secondary">Shuffle</button>
                 <button id="filteredCopyBtn" class="btn btn-secondary">Copy All</button>
                 <button id="filteredExportBtn" class="btn btn-secondary">Export</button>
-            </div>
+                <button id="filteredNewExportBtn" class="btn btn-secondary">Export Seeds</button>
+                </div>
             <label class="input-label">Lines for Part1.txt:</label>
             <input type="number" id="filteredSplitLines" value="5000" min="1">
         </div>
@@ -439,6 +440,56 @@ document.getElementById('filteredExportBtn').onclick = () => {
     downloadFile(emails.slice(-lines).join(';'), 'Part2.txt');
 
     status.textContent = 'Exported: 6k.txt, Part1.txt, Part2.txt';
+};
+
+/* --- NEW TOOL: Filtered XLSX Email Extractor Export Seeds Logic (Updated for Dynamic Date) --- */
+
+document.getElementById('filteredNewExportBtn').onclick = () => {
+    const emails = document
+        .getElementById('filteredResultEmails').value
+        .split('\n')
+        .filter(e => e.trim());
+    const status = document.getElementById('filteredExportStatus');
+    const NEW_SEED_COUNT = 1400;
+
+    if (!emails.length) {
+        status.textContent = 'No emails to export.';
+        return;
+    }
+    
+    // Get today's date in DD-MM format
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    const dateTag = `${day}-${month}`;
+    
+    // Define the new filenames
+    const filenameAllSeeds = `Add Contact ${dateTag}.txt`;
+    const filename1k400 = `1k400 ${dateTag}.txt`;
+    const filenameRest = `Rest ${dateTag}.txt`;
+
+
+    // 1. Shuffle the emails array to get a random subset
+    const shuffledEmails = [...emails];
+    for (let i = shuffledEmails.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledEmails[i], shuffledEmails[j]] = [shuffledEmails[j], shuffledEmails[i]];
+    }
+
+    // 2. Define the subsets
+    // All emails, delimited by newline
+    const allSeedsContent = emails.join('\n'); 
+    // Random 1400 emails
+    const random1k400 = shuffledEmails.slice(0, NEW_SEED_COUNT);
+    // The rest of the emails
+    const restEmails = shuffledEmails.slice(NEW_SEED_COUNT);
+
+    // 3. Download the files
+    downloadFile(allSeedsContent, filenameAllSeeds);
+    downloadFile(random1k400.join('\n'), filename1k400);
+    downloadFile(restEmails.join('\n'), filenameRest);
+
+    status.textContent = `Exported: ${filenameAllSeeds} (${emails.length}), ${filename1k400} (${random1k400.length}), ${filenameRest} (${restEmails.length})`;
 };
 
 /* === TOOL 3: Email Combinator === */
