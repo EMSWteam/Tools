@@ -281,9 +281,9 @@ tasksToRun.sort(function(a, b) {
     return aTotal - bTotal;
 });
 
-// Display the plan to the user
+// Display the plan to the user - **MODIFIED TO USE alert()**
 var planText = tasksToRun.map(t => `${t.time} -> ${t.fileName}`).join('\n');
-prompt("Deployment Plan:", "The script will run " + tasksToRun.length + " drops with a 90-minute interval, anchored to " + pad2(F_h) + ":" + pad2(Minute_Component) + ".\n\nRange: " + pad2(F_h) + ":XX to " + pad2(L_h) + ":XX\n\n" + planText);
+alert("Deployment Plan:\n\nThe script will run " + tasksToRun.length + " drops with a 90-minute interval, anchored to " + pad2(F_h) + ":" + pad2(Minute_Component) + ".\n\nRange: " + pad2(F_h) + ":XX to " + pad2(L_h) + ":XX\n\n" + planText);
 
 
 // 6. Setup global macro header
@@ -327,7 +327,7 @@ for (var idx = 0; idx < tasksToRun.length; idx++) {
         var contentArray = allFileLines.slice(currentLineIndex, currentLineIndex + linesForThisTab);
         
         tabContents[t] = contentArray.join("\\n"); 
-        currentLineIndex += linesForThisTab;
+        currentLineIndex += linesForTab;
     }
     // === END CONTENT SPLITTING ===
 
