@@ -45,37 +45,22 @@ if (isNaN(Minute_Component) || Minute_Component < 0 || Minute_Component > 59) {
     throw new Error("Invalid minute component input.");
 }
 
-// === CALCULATE THE TOTAL MINUTE SHIFT ===
+// === CALCULATE THE TOTAL MINUTE SHIFT (MODIFIED LOGIC) ===
 var targetHour = F_h;
 var targetMinute = Minute_Component;
 var targetTotalMinutes = targetHour * 60 + targetMinute;
 
-// Find the index of the base drop time whose HOUR is closest to the target hour (F_h)
-var closestIndex = -1;
-var minDiff = Infinity;
-for (var i = 0; i < BASE_MINUTES_FROM_MIDNIGHT.length; i++) {
-    var currentBaseHour = Math.floor(BASE_MINUTES_FROM_MIDNIGHT[i] / 60);
-    var diff = Math.abs(currentBaseHour - targetHour);
-    
-    // Find the base time that is closest or equal to the target hour (15:30 is better for 15:10 than 14:00)
-    if (diff < minDiff) {
-        minDiff = diff;
-        closestIndex = i;
-    } else if (diff === minDiff && currentBaseHour > Math.floor(BASE_MINUTES_FROM_MIDNIGHT[closestIndex] / 60)) {
-        // If difference is the same (e.g., 14:00 and 17:00 both 1 hour from 15), choose the later one (17:00)
-        minDiff = diff;
-        closestIndex = i;
-    }
-}
+// MODIFICATION: The index is FORCED to 0 to always anchor the schedule shift
+// to the first base time (11:00), which corresponds to the first line in Brave.txt.
+var closestIndex = 0; 
 
-// In case of error, default to the 11:00 base time.
-if (closestIndex === -1) closestIndex = 0; 
-
+// The original complex search logic is replaced by forcing closestIndex = 0
 var baseMinutesOfTargetFile = BASE_MINUTES_FROM_MIDNIGHT[closestIndex];
 
 // This is the single, constant shift applied to ALL 10 drops in the schedule.
 var totalMinuteOffset = targetTotalMinutes - baseMinutesOfTargetFile; 
-// Example: 749 (12:29) - 750 (12:30) = -1 minute.
+// Example: If F_h=12, Minute_Component=29: 749 (12:29) - 660 (11:00) = +89 minutes.
+// The entire schedule will shift by +89 minutes.
 
 // ============================================
 // FILE READING FUNCTIONS
@@ -327,7 +312,7 @@ for (var idx = 0; idx < tasksToRun.length; idx++) {
         var contentArray = allFileLines.slice(currentLineIndex, currentLineIndex + linesForThisTab);
         
         tabContents[t] = contentArray.join("\\n"); 
-        currentLineIndex += linesForTab;
+        currentLineIndex += linesForThisTab; // Fix: Should use linesForThisTab here
     }
     // === END CONTENT SPLITTING ===
 
