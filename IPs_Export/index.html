@@ -70,7 +70,6 @@
   }
 
   input {
-    <!-- width: 100%; -->
     height: 40px;
     border: none;
     padding: 0.5rem 0.75rem;
@@ -135,6 +134,16 @@
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   }
 
+  /* New style for the Selenium/Brave buttons */
+  .secondary-accent-btn {
+    background-color: #68d391; /* Greenish accent */
+  }
+  .secondary-accent-btn:hover {
+    background-color: #38a169;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+
   @media (max-width: 768px) {
     body {
       padding: 20px 10px;
@@ -166,6 +175,8 @@
   <button class="accent-btn" onclick="exportEms3()">Export EMS3</button>
   <button class="accent-btn" onclick="exportEms4()">Export EMS4</button>
   <button class="accent-btn" onclick="exportEms6()">Export EMS6</button>
+  <button class="secondary-accent-btn" onclick="exportEms6Selenium()">Export Selenium</button>
+  <button class="secondary-accent-btn" onclick="exportEms6Brave()">Export Brave</button>
 </div>
 
 <div id="container">
@@ -245,6 +256,7 @@ function exportGridColumns(filenamePrefix, suffix = '') {
     const blob = new Blob([col.join('\n')], {type: 'text/plain'});
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
+    // The file name format is ips[ColNumber][Suffix].txt
     link.download = `${filenamePrefix}${i+1}${suffix}.txt`;
     document.body.appendChild(link);
     link.click();
@@ -265,6 +277,18 @@ function exportEms4() {
 function exportEms6() {
   exportGridColumns('ips', 'ems6');
 }
+
+// New Export Functions for Selenium and Brave
+function exportEms6Selenium() {
+  // This will produce ipsXems6_Selenium.txt (e.g., ips1ems6_Selenium.txt)
+  exportGridColumns('ips', 'ems6_Selenium');
+}
+
+function exportEms6Brave() {
+  // This will produce ipsXems6_Brave.txt (e.g., ips1ems6_Brave.txt)
+  exportGridColumns('ips', 'ems6_Brave');
+}
+
 
 // Clear all inputs in the grid
 function clearGrid() {
