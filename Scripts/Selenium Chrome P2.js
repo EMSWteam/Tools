@@ -6,7 +6,7 @@
 var START_TAB = 2; // Start at Tab 2 
 var END_TAB = 3; // End at Tab 6 (Maintains 5 tabs total: 2, 3, 4, 5, 6)
 var BATCH_SIZE = 100; // Number of emails per tab
-var EMAIL_FILE = "2k800.txt"; // The file containing 1400 emails
+var EMAIL_FILE = "Selenium2.txt"; // The file containing 1400 emails
 var TABS_TO_USE = END_TAB - START_TAB + 1; // Calculated as 5
 
 // Other original config variables
@@ -37,8 +37,8 @@ function ask(question, defaultValue) {
 
 // Hour input configuration
 var F_h = parseInt(ask("Enter Start Hour (F_h) in 24h format:", 12), 10);
-var L_h = parseInt(ask("Enter End Hour (L_h) in 24h format:", 1), 10);
-var M_m = parseInt(ask("Enter a Minute (M_m) for the Launch At time:", 32), 10);
+var L_h = parseInt(ask("Enter End Hour (L_h) in 24h format:", 21), 10);
+var M_m = parseInt(ask("Enter a Minute (M_m) for the Launch At time:", 30), 10);
 
 // === UTILITY FUNCTIONS ===
 
