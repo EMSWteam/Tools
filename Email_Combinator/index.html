@@ -442,7 +442,7 @@ document.getElementById('filteredExportBtn').onclick = () => {
     status.textContent = 'Exported: 6k.txt, Part1.txt, Part2.txt';
 };
 
-/* --- UPDATED LOGIC: Filtered XLSX Email Extractor Export Seeds (5 Files: 1k400, 2k800, 1k400(2), Rest) --- */
+/* --- MODIFIED LOGIC: Filtered XLSX Email Extractor Export Seeds (5 Files: Selenium 1-4) --- */
 
 document.getElementById('filteredNewExportBtn').onclick = () => {
     const emails = document
@@ -451,11 +451,11 @@ document.getElementById('filteredNewExportBtn').onclick = () => {
         .filter(e => e.trim());
     const status = document.getElementById('filteredExportStatus');
     
-    // Define the required batch sizes
-    const BATCH_1_COUNT = 1400; // 1k400
-    const BATCH_2_COUNT = 2800; // 2k800
-    const BATCH_3_COUNT = 1400; // 1k400(2)
-    const MINIMUM_EMAILS_REQUIRED = BATCH_1_COUNT + BATCH_2_COUNT + BATCH_3_COUNT; // 5600
+    // Define the required batch sizes (700, 2000, 1400)
+    const BATCH_1_COUNT = 700;  // Selenium1
+    const BATCH_2_COUNT = 2000; // Selenium2
+    const BATCH_3_COUNT = 1400; // Selenium3
+    const MINIMUM_EMAILS_REQUIRED = BATCH_1_COUNT + BATCH_2_COUNT + BATCH_3_COUNT; // 4100
 
     if (!emails.length) {
         status.textContent = 'No emails to export.';
@@ -464,7 +464,7 @@ document.getElementById('filteredNewExportBtn').onclick = () => {
     
     // Check for minimum required emails
     if (emails.length < MINIMUM_EMAILS_REQUIRED) {
-        status.innerHTML = `<span class="error">Not enough emails (${emails.length}) to create the three main batches (1k400, 2k800, 1k400(2)). Requires ${MINIMUM_EMAILS_REQUIRED} minimum.</span>`;
+        status.innerHTML = `<span class="error">Not enough emails (${emails.length}) to create the three main batches (700, 2000, 1400). Requires ${MINIMUM_EMAILS_REQUIRED} minimum.</span>`;
         return;
     }
     
@@ -475,11 +475,11 @@ document.getElementById('filteredNewExportBtn').onclick = () => {
     const dateTag = `${day}-${month}`;
     
     // Define the new filenames (5 files)
-    const filenameAllSeeds = `Add Contact ${dateTag}.txt`;
-    const filename1k400_1 = `1k400 ${dateTag}.txt`; 
-    const filename2k800 = `2k800 ${dateTag}.txt`;
-    const filename1k400_2 = `1k400(2) ${dateTag}.txt`; 
-    const filenameRest = `Rest ${dateTag}.txt`;
+    const filenameAllSeeds = `Add Contact All ${dateTag}.txt`;
+    const filenameSelenium1 = `Selenium1 ${dateTag}.txt`; 
+    const filenameSelenium2 = `Selenium2 ${dateTag}.txt`;
+    const filenameSelenium3 = `Selenium3 ${dateTag}.txt`; 
+    const filenameSelenium4 = `Selenium4 ${dateTag}.txt`; // Contains 2000 + rest (which is just the 'rest' of the shuffled list)
 
 
     // 1. Shuffle the emails array
@@ -490,33 +490,33 @@ document.getElementById('filteredNewExportBtn').onclick = () => {
     }
 
     // 2. Define the subsets
-    // All emails, delimited by newline (using original list for Add Contact)
+    // All emails, delimited by newline (using original list for Add Contact All)
     const allSeedsContent = emails.join('\n'); 
     
-    const endOfBatch1 = BATCH_1_COUNT; // 1400
-    const endOfBatch2 = endOfBatch1 + BATCH_2_COUNT; // 4200
-    const endOfBatch3 = endOfBatch2 + BATCH_3_COUNT; // 5600
+    const endOfBatch1 = BATCH_1_COUNT;        // 700
+    const endOfBatch2 = endOfBatch1 + BATCH_2_COUNT; // 2700
+    const endOfBatch3 = endOfBatch2 + BATCH_3_COUNT; // 4100
 
-    // First 1400 emails (Index 0 to 1400)
-    const random1k400_1 = shuffledEmails.slice(0, endOfBatch1);
+    // First 700 emails (Index 0 to 700)
+    const randomSelenium1 = shuffledEmails.slice(0, endOfBatch1);
     
-    // Next 2800 emails (Index 1400 to 4200)
-    const random2k800 = shuffledEmails.slice(endOfBatch1, endOfBatch2);
+    // Next 2000 emails (Index 700 to 2700)
+    const randomSelenium2 = shuffledEmails.slice(endOfBatch1, endOfBatch2);
     
-    // Next 1400 emails (Index 4200 to 5600)
-    const random1k400_2 = shuffledEmails.slice(endOfBatch2, endOfBatch3);
+    // Next 1400 emails (Index 2700 to 4100)
+    const randomSelenium3 = shuffledEmails.slice(endOfBatch2, endOfBatch3);
     
-    // The rest of the emails (Index 5600 onwards)
-    const restEmails = shuffledEmails.slice(endOfBatch3);
+    // The rest of the emails (Index 4100 onwards)
+    const randomSelenium4 = shuffledEmails.slice(endOfBatch3);
 
     // 3. Download the files
     downloadFile(allSeedsContent, filenameAllSeeds);
-    downloadFile(random1k400_1.join('\n'), filename1k400_1);
-    downloadFile(random2k800.join('\n'), filename2k800);
-    downloadFile(random1k400_2.join('\n'), filename1k400_2);
-    downloadFile(restEmails.join('\n'), filenameRest);
+    downloadFile(randomSelenium1.join('\n'), filenameSelenium1);
+    downloadFile(randomSelenium2.join('\n'), filenameSelenium2);
+    downloadFile(randomSelenium3.join('\n'), filenameSelenium3);
+    downloadFile(randomSelenium4.join('\n'), filenameSelenium4);
 
-    status.textContent = `Exported 5 files: ${filenameAllSeeds} (${emails.length}), ${filename1k400_1} (${random1k400_1.length}), ${filename2k800} (${random2k800.length}), ${filename1k400_2} (${random1k400_2.length}), ${filenameRest} (${restEmails.length})`;
+    status.textContent = `Exported 5 files: ${filenameAllSeeds} (${emails.length}), ${filenameSelenium1} (${randomSelenium1.length}), ${filenameSelenium2} (${randomSelenium2.length}), ${filenameSelenium3} (${randomSelenium3.length}), ${filenameSelenium4} (${randomSelenium4.length})`;
 };
 
 /* === TOOL 3: Email Combinator === */
