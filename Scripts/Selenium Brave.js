@@ -22,47 +22,6 @@ var tabsCount = 5;                   // Number of tabs for deployment
 var startTab = 2;                    // First tab number (T=2)
 
 // ============================================
-// MANUAL HOUR AND MINUTE SELECTION
-// ============================================
-var now = new Date();
-var defaultHour = now.getHours();
-var defaultMinute = now.getMinutes();
-
-// Prompt for Start and End Hours (F_h, L_h)
-var F_h = parseInt(prompt("Enter Start Hour (F_h) in 24h format:", defaultHour), 10);
-var L_h = parseInt(prompt("Enter End Hour (L_h) in 24h format:", defaultHour), 10);
-
-if (isNaN(F_h) || isNaN(L_h) || F_h < 0 || F_h > 23 || L_h < 0 || L_h > 23) {
-    alert("Invalid hour input. Exiting script.");
-    throw new Error("Invalid hour input.");
-}
-
-// Prompt for Minute Component: This minute determines the precise minute of the drop in the F_h hour.
-var Minute_Component = parseInt(prompt("Enter Minute component (MM) for the F_h drop (e.g., 29 for 12:29):", defaultMinute), 10);
-
-if (isNaN(Minute_Component) || Minute_Component < 0 || Minute_Component > 59) {
-    alert("Invalid minute component input. Exiting script.");
-    throw new Error("Invalid minute component input.");
-}
-
-// === CALCULATE THE TOTAL MINUTE SHIFT (MODIFIED LOGIC) ===
-var targetHour = F_h;
-var targetMinute = Minute_Component;
-var targetTotalMinutes = targetHour * 60 + targetMinute;
-
-// MODIFICATION: The index is FORCED to 0 to always anchor the schedule shift
-// to the first base time (11:00), which corresponds to the first line in Brave.txt.
-var closestIndex = 0; 
-
-// The original complex search logic is replaced by forcing closestIndex = 0
-var baseMinutesOfTargetFile = BASE_MINUTES_FROM_MIDNIGHT[closestIndex];
-
-// This is the single, constant shift applied to ALL 10 drops in the schedule.
-var totalMinuteOffset = targetTotalMinutes - baseMinutesOfTargetFile; 
-// Example: If F_h=12, Minute_Component=29: 749 (12:29) - 660 (11:00) = +89 minutes.
-// The entire schedule will shift by +89 minutes.
-
-// ============================================
 // FILE READING FUNCTIONS
 // ============================================
 
@@ -92,6 +51,73 @@ function GetPrefixesContent(file) {
     return lines.length > 0 ? lines.join("\\n") : "NO CONTENT READ";
 }
 
+// 1. Read file prefixes from Brave.txt (Moved up to prompt for anchor)
+var filePrefixesContent = GetPrefixesContent(BRAVE_FILE);
+var prefixArray = filePrefixesContent.split("\\n").map(p => p.trim()).filter(p => p.length > 0);
+
+if (prefixArray.length < BASE_MINUTES_FROM_MIDNIGHT.length) {
+    alert("ERROR: Brave.txt must contain at least " + BASE_MINUTES_FROM_MIDNIGHT.length + " lines (10 file prefixes). Check the file contents and location.");
+    throw new Error("Brave.txt incomplete.");
+}
+
+// ============================================
+// MANUAL HOUR AND MINUTE SELECTION
+// ============================================
+var now = new Date();
+var defaultHour = now.getHours();
+var defaultMinute = now.getMinutes();
+
+// Prompt for Start and End Hours (F_h, L_h)
+var F_h = parseInt(prompt("Enter Start Hour (F_h) in 24h format:", defaultHour), 10);
+var L_h = parseInt(prompt("Enter End Hour (L_h) in 24h format:", defaultHour), 10);
+
+if (isNaN(F_h) || isNaN(L_h) || F_h < 0 || F_h > 23 || L_h < 0 || L_h > 23) {
+    alert("Invalid hour input. Exiting script.");
+    throw new Error("Invalid hour input.");
+}
+
+// Prompt for Minute Component: This minute determines the precise minute of the drop in the F_h hour.
+var Minute_Component = parseInt(prompt("Enter Minute component (MM) for the F_h drop (e.g., 29 for 12:29):", defaultMinute), 10);
+
+if (isNaN(Minute_Component) || Minute_Component < 0 || Minute_Component > 59) {
+    alert("Invalid minute component input. Exiting script.");
+    throw new Error("Invalid minute component input.");
+}
+
+// Prepare the list for the anchor prompt
+var fileList = prefixArray.map((p, i) => `[${i + 1}] ${p}`).join('\n');
+
+// MODIFICATION: Prompt for the ANCHOR line index
+var anchorIndexInput = parseInt(prompt(
+    "Deployment Start Time: " + F_h + ":" + Minute_Component + 
+    "\n\nWhich line from Brave.txt should correspond to this time?\n\n" + 
+    "Enter the number (1-" + BASE_MINUTES_FROM_MIDNIGHT.length + ") of the list item:\n\n" + 
+    fileList, 
+    1
+), 10);
+
+if (isNaN(anchorIndexInput) || anchorIndexInput < 1 || anchorIndexInput > BASE_MINUTES_FROM_MIDNIGHT.length) {
+    alert("Invalid anchor list number. Exiting script.");
+    throw new Error("Invalid anchor list number.");
+}
+
+// === CALCULATE THE TOTAL MINUTE SHIFT (MODIFIED LOGIC) ===
+var targetHour = F_h;
+var targetMinute = Minute_Component;
+var targetTotalMinutes = targetHour * 60 + targetMinute;
+
+// MODIFICATION: The index is now determined by the user's input (1-based to 0-based)
+var closestIndex = anchorIndexInput - 1; 
+
+// The original complex search logic is replaced by forcing closestIndex = 0
+// var closestIndex = 0; // REMOVED/COMMENTED OUT
+
+var baseMinutesOfTargetFile = BASE_MINUTES_FROM_MIDNIGHT[closestIndex];
+
+// This is the single, constant shift applied to ALL 10 drops in the schedule.
+var totalMinuteOffset = targetTotalMinutes - baseMinutesOfTargetFile; 
+// Example: If F_h=12, Minute_Component=29 and closestIndex=2 (14:00 base time): 749 (12:29) - 840 (14:00) = -91 minutes.
+// The entire schedule will shift by -91 minutes.
 
 // ============================================
 // UTILITY FUNCTIONS
@@ -210,14 +236,7 @@ function buildTabMacro(tabNum, tabContent, launchAt, listNbr) {
 // MAIN EXECUTION
 // ============================================
 
-// 1. Read file prefixes from Brave.txt
-var filePrefixesContent = GetPrefixesContent(BRAVE_FILE);
-var prefixArray = filePrefixesContent.split("\\n").map(p => p.trim()).filter(p => p.length > 0);
-
-if (prefixArray.length < BASE_MINUTES_FROM_MIDNIGHT.length) {
-    alert("ERROR: Brave.txt must contain at least " + BASE_MINUTES_FROM_MIDNIGHT.length + " lines (10 file prefixes). Check the file contents and location.");
-    throw new Error("Brave.txt incomplete.");
-}
+// 1. Read file prefixes from Brave.txt - **STEP MOVED UP**
 
 // 2. Generate the DYNAMIC SCHEDULE based on the total minute shift
 var DYNAMIC_SCHEDULE = generateDynamicSchedule(totalMinuteOffset, prefixArray);
@@ -268,7 +287,7 @@ tasksToRun.sort(function(a, b) {
 
 // Display the plan to the user - **MODIFIED TO USE alert()**
 var planText = tasksToRun.map(t => `${t.time} -> ${t.fileName}`).join('\n');
-alert("Deployment Plan:\n\nThe script will run " + tasksToRun.length + " drops with a 90-minute interval, anchored to " + pad2(F_h) + ":" + pad2(Minute_Component) + ".\n\nRange: " + pad2(F_h) + ":XX to " + pad2(L_h) + ":XX\n\n" + planText);
+alert("Deployment Plan:\n\nThe script will run " + tasksToRun.length + " drops with a 90-minute interval.\n\nRange: " + pad2(F_h) + ":XX to " + pad2(L_h) + ":XX\nAnchor Line: " + anchorIndexInput + " (" + prefixArray[closestIndex] + ")\n\n" + planText);
 
 
 // 6. Setup global macro header
@@ -312,7 +331,7 @@ for (var idx = 0; idx < tasksToRun.length; idx++) {
         var contentArray = allFileLines.slice(currentLineIndex, currentLineIndex + linesForThisTab);
         
         tabContents[t] = contentArray.join("\\n"); 
-        currentLineIndex += linesForThisTab; // Fix: Should use linesForThisTab here
+        currentLineIndex += linesForThisTab; // Corrected
     }
     // === END CONTENT SPLITTING ===
 
