@@ -1,126 +1,820 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User-Agent Detector</title>
-    <style>
-        /* Global Styles */
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #4CAF50, #2196F3);
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-        }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Combined Email & Data Tools</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root {
+    --background-color: #FBF8F4;
+    --card-background: #FFFFFF;
+    --text-color: #4A4541;
+    --subtle-text: #776C63;
+    --border-color: #EAE0D5;
+    --primary-color: #D96144;
+    --secondary-color: #5E8BA8;
+    --button-text-color: #fff;
+    --font-family: 'Poppins', sans-serif;
+    --box-shadow: 0 10px 30px rgba(10, 20, 30, 0.05);
+}
 
-        /* Container */
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 30px;
-            width: 90%;
-            max-width: 600px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
+body {
+    font-family: var(--font-family);
+    background: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
 
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-        }
+/* === Tab Bar === */
+.tab-bar {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    border-bottom: 2px solid var(--border-color);
+    background: var(--card-background);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: var(--box-shadow);
+}
 
-        h2 {
-            margin-top: 30px;
-            font-size: 1.5rem;
-        }
+.tab-button {
+    flex: 1;
+    text-align: center;
+    padding: 1.2rem;
+    font-weight: 600;
+    color: var(--subtle-text);
+    cursor: pointer;
+    transition: all 0.25s ease-in-out; /* Smoother transition for all properties */
+    border-bottom: 3px solid transparent;
+    user-select: none;
+    position: relative;
+}
+/* Subtler Hover Effect: no text color change */
+.tab-button:hover {
+    color: var(--subtle-text);
+    box-shadow: 0 2px 0 -1px var(--border-color) inset; /* Subtle border-like shadow */
+}
+/* Active Tab: darker text, primary-color border, no shadow */
+.tab-button.active {
+    color: var(--text-color);
+    border-color: var(--primary-color);
+    box-shadow: none;
+}
 
-        #userAgent {
-            margin-top: 10px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            font-size: 1rem;
-            color: #000;
-            word-wrap: break-word;
-        }
+/* === Tab Content === */
+.tab-content {
+    display: none;
+    opacity: 0;
+    transform: translateY(15px); /* Increased transform distance for slide effect */
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    max-width: 1400px;
+    width: 90%;
+    margin: 2rem auto;
+}
+.tab-content.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
 
-        /* Buttons */
-        .buttons {
-            margin-top: 20px;
-        }
-
-        button {
-            background: #FFC107;
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            font-size: 1rem;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-            margin: 5px;
-        }
-		#copyButton {
-            background: #a63830;
-            color: #000;
-            border: none;
-            padding: 10px 15px;
-            font-size: 1rem;
-            border-radius: 100px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-            margin: 5px;
-        }
-
-        button:hover {
-            background: #FFA000;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 1.5rem;
-            }
-        }
-    </style>
+/* === Tool Card Layout === */
+.tool-card {
+    background: var(--card-background);
+    border-radius: 16px;
+    box-shadow: var(--box-shadow);
+    padding: 2.5rem;
+    box-sizing: border-box;
+}
+h1 {
+    margin: 0 0 1rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+.description {
+    font-size: 1rem;
+    color: var(--subtle-text);
+    margin-bottom: 2rem;
+}
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+input[type="file"], input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    box-sizing: border-box;
+}
+input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(217,97,68,0.15);
+}
+.input-label { font-size: 0.9rem; color: var(--subtle-text); margin-bottom: .5rem; display:block; }
+.btn {
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color .2s, transform .1s;
+}
+.btn-primary { background: var(--primary-color); color: var(--button-text-color); }
+.btn-primary:hover { background-color: #b45037; }
+.btn-secondary { background: var(--secondary-color); color: #fff; }
+.btn-secondary:hover { background-color: #4A728E; }
+.btn-success { background:#28a745;color:#fff; }
+.btn-success:hover { background:#1e7e34; }
+.actions-group { display: flex; flex-wrap: wrap; gap:1rem; margin-top:1.5rem; justify-content:space-between; }
+.output-section textarea, .tool-card.scheduler pre {
+    width:100%; min-height:150px; padding:1rem; border-radius:12px;
+    border:1px solid var(--border-color); background:var(--background-color);
+    color:var(--text-color); box-sizing:border-box; resize:vertical;
+}
+pre { white-space: pre-wrap; font-family: monospace; }
+.list-group { border:1px solid var(--border-color); margin-bottom:15px; padding:15px; border-radius:8px; background:var(--background-color); }
+.list-name { font-weight:700; color:var(--text-color); margin-bottom:5px; padding-bottom:5px; border-bottom:2px solid var(--secondary-color); font-size:1.1rem; }
+.email-list { list-style:none; margin:0; padding:5px 0; max-height:150px; overflow-y:auto; }
+.email-list li { padding:3px 0; font-size:.9em; border-bottom:1px dotted var(--border-color);}
+.email-list li:last-child{border:none;}
+.info{color:var(--subtle-text);font-style:italic;}
+.error{color:var(--primary-color);font-weight:bold;}
+</style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>User-Agent Detector</h1>
-        <div class="buttons">
-            <button onclick="getUserAgent()">Show My User-Agent</button>
-        </div>
+<div class="tab-bar">
+    <div class="tab-button active" data-tab="extractor">Multi-File Extractor</div>
+    <div class="tab-button" data-tab="combinator">Email Combinator</div>
+    <div class="tab-button" data-tab="filtered">Filtered XLSX Extractor</div>
+    <div class="tab-button" data-tab="scheduler">ID Scheduler</div>
+</div>
 
-        <h2>Your User-Agent:</h2>
-        <p id="userAgent">Click the button above to reveal your User-Agent string!</p>
-		<div class="buttons">
-            <button id="copyButton" onclick="copyToClipboard()" disabled>Copy</button>
+<div id="extractor" class="tab-content active">
+    <div class="tool-card">
+        <h1>Multi-File Email Extractor</h1>
+        <p class="description">Upload one or more .xlsx, .csv, or .txt files. Extracts emails from rows with “Successfully connected”.</p>
+        <div class="input-group">
+            <label class="input-label">Select Files:</label>
+            <input type="file" id="extractorFileInput" accept=".csv,.txt,.xlsx" multiple>
+        </div>
+        <button id="extractorExtractButton" class="btn btn-primary">Extract Emails</button>
+        <div class="output-section">
+            <p id="extractorResultSummary" class="info">No files processed yet.</p>
+            <div class="actions-group" id="extractorButtons" style="display:none">
+                <button id="extractorCopyButton" class="btn btn-secondary">Copy All</button>
+                <button id="extractorDownloadTxtButton" class="btn btn-success">Download TXT</button>
+            </div>
+            <div id="emailListsContainer"></div>
         </div>
     </div>
+</div>
 
-    <script>
-        function getUserAgent() {
-            const userAgent = navigator.userAgent; // Retrieve User-Agent string
-            const userAgentElement = document.getElementById("userAgent");
-            userAgentElement.textContent = userAgent; // Display User-Agent
-            document.getElementById("copyButton").disabled = false; // Enable copy button
+<div id="combinator" class="tab-content">
+    <div class="tool-card">
+        <h1>Email Combinator</h1>
+        <p class="description">Combine usernames and domains to generate email addresses, plus manual ones.</p>
+        <div class="input-group">
+            <label class="input-label">Usernames (semicolon-separated):</label>
+            <input id="combinatorUsernameInput" type="text" placeholder="support; sales; info" />
+            <label class="input-label">Domains (one per line):</label>
+            <textarea id="combinatorDomainInput" placeholder="gmail.com&#10;outlook.com"></textarea>
+            <label class="input-label">Manual Emails:</label>
+            <textarea id="combinatorManualEmailInput" placeholder="john@example.com&#10;jane@test.net"></textarea>
+        </div>
+        <div class="actions-group">
+            <button id="combinatorGenerateBtn" class="btn btn-primary">Generate</button>
+            <button id="combinatorDownloadCsvBtn" class="btn btn-secondary">Download CSV</button>
+        </div>
+        <div class="output-section">
+            <textarea id="combinatorOutputArea" readonly placeholder="Emails will appear here..."></textarea>
+            <div class="actions-group">
+                <button id="combinatorCopyBtn" class="btn btn-secondary">Copy All</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="filtered" class="tab-content">
+    <div class="tool-card">
+        <h1>Filtered XLSX Email Extractor</h1>
+        <p class="description">Upload one or more Excel files. Finds unique emails from rows containing a specific phrase.</p>
+        <div class="input-group">
+            <label class="input-label">Select XLSX files:</label>
+            <input id="filteredFileInput" type="file" accept=".xlsx,.xls" multiple />
+            <label class="input-label">Filter Phrase:</label>
+            <input id="filteredPhrase" type="text" value="Contact file added successfully" />
+        </div>
+        <button id="filteredParseBtn" class="btn btn-primary">Extract Emails</button>
+        <div class="output-section">
+            <textarea id="filteredResultEmails" readonly placeholder="Emails will appear here..."></textarea>
+            <div class="actions-group">
+                <button id="filteredShuffleBtn" class="btn btn-secondary">Shuffle</button>
+                <button id="filteredCopyBtn" class="btn btn-secondary">Copy All</button>
+                <button id="filteredExportBtn" class="btn btn-secondary">Export</button>
+                <button id="filteredNewExportBtn" class="btn btn-secondary">Export Seeds</button>
+                </div>
+            <label class="input-label">Lines for Part1.txt:</label>
+            <input type="number" id="filteredSplitLines" value="5000" min="1">
+        </div>
+        <div id="filteredExportStatus" style="margin-top:10px;"></div>
+    </div>
+</div>
+
+<div id="scheduler" class="tab-content">
+    <div class="tool-card scheduler">
+        <h1>ID Pairing Scheduler</h1>
+        <p class="description">Pair IDs and assign a schedule based on start time, one pair per hour increment.</p>
+        <textarea id="schedulerInputIds" placeholder="101145741&#10;101145734&#10;101145750"></textarea>
+        <div class="actions-group" style="margin-top:1rem;">
+            <input type="number" id="schedulerStartHour" min="0" max="23" value="16">
+            <input type="number" id="schedulerMinute" min="0" max="59" value="30">
+            <label><input type="checkbox" id="schedulerReverse" checked> Reverse</label>
+            <button id="schedulerGenerate" class="btn btn-primary">Generate</button>
+        </div>
+        <pre id="schedulerOutput"></pre>
+        <div class="actions-group">
+            <button id="schedulerCopy" class="btn btn-secondary">Copy</button>
+            <button id="schedulerDownload" class="btn btn-secondary">Download</button>
+            <button id="schedulerClear" class="btn btn-secondary">Clear</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', (event) => {
+/* === TAB SWITCHING === */
+document.querySelectorAll('.tab-button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    // 1. Remove 'active' class from all buttons
+    document.querySelectorAll('.tab-button').forEach(b=>b.classList.remove('active'));
+    // 2. Remove 'active' class from all content sections
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    // 3. Add 'active' class to the clicked button
+    btn.classList.add('active');
+    // 4. Add 'active' class to the corresponding content section
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+/* === COMMON HELPERS === */
+function csvEscape(str){if(str==null)return'';return'"'+String(str).replace(/"/g,'""')+'"';}
+
+function downloadFile(data,filename){
+    const blob=new Blob([data],{type:'text/plain'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function copyTextFromElement(element,button,originalText){
+    const textToCopy=element.tagName==='TEXTAREA'?element.value:element.textContent;
+    navigator.clipboard.writeText(textToCopy).then(()=>{
+        button.textContent='Copied!';
+        setTimeout(()=>button.textContent=originalText,1200);
+    });
+}
+
+/**
+ * Splits an array into chunks of a specified size.
+ * @param {Array<T>} array - The array to chunk.
+ * @param {number} size - The size of each chunk.
+ * @returns {Array<Array<T>>} An array of chunks.
+ */
+function chunkArray(array, size) {
+    const chunkedArr = [];
+    for (let i = 0; i < array.length; i += size) {
+        chunkedArr.push(array.slice(i, i + size));
+    }
+    return chunkedArr;
+}
+
+/* === TOOL 1: Multi-file Extractor - CORRECTED LOGIC === */
+const EMAIL_COL_INDEX=0,LIST_NAME_COL_INDEX=4,STATUS_COL_INDEX=6,SUCCESS_STATUS="Successfully connected";
+let finalGroupedEmailsData = {}; // Stores all extracted emails, grouped by list name
+
+// Function to process a single file (XLSX, CSV, or TXT) and extract emails
+async function processFile(file) {
+    const fileName = file.name;
+    const mimeType = file.type;
+    let data;
+
+    if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+        data = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const workbook = XLSX.read(e.target.result, { type: 'array' });
+                    // Assume the first sheet is the one to use
+                    const sheetName = workbook.SheetNames[0];
+                    // Convert sheet to a 2D array (list of lists)
+                    resolve(XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: '' }));
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            reader.onerror = reject;
+            reader.readAsArrayBuffer(file);
+        });
+    } else if (fileName.endsWith('.csv') || fileName.endsWith('.txt')) {
+        data = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                // Simple split by newline for CSV/TXT
+                resolve(e.target.result.split('\n').map(line => line.split(','))); // Simple split by comma for CSV
+            };
+            reader.onerror = reject;
+            reader.readAsText(file);
+        });
+    } else {
+        throw new Error("Unsupported file type.");
+    }
+
+    const fileGroupedEmails = {}; // Emails for the current file
+
+    for (const row of data) {
+        // Ensure row has enough columns and status matches
+        if (row.length > STATUS_COL_INDEX && String(row[STATUS_COL_INDEX]).trim() === SUCCESS_STATUS) {
+            const email = String(row[EMAIL_COL_INDEX]).trim().toLowerCase();
+            const listName = String(row[LIST_NAME_COL_INDEX]).trim() || 'Unknown List';
+
+            // Basic email validation (optional but good practice)
+            if (email && email.includes('@')) {
+                // Group by list name
+                if (!fileGroupedEmails[listName]) {
+                    fileGroupedEmails[listName] = new Set();
+                }
+                fileGroupedEmails[listName].add(email);
+            }
+        }
+    }
+
+    return fileGroupedEmails;
+}
+
+document.getElementById('extractorExtractButton').onclick = async () => {
+    const files = Array.from(document.getElementById('extractorFileInput').files);
+    const resultSummary = document.getElementById('extractorResultSummary');
+    const emailListsContainer = document.getElementById('emailListsContainer');
+    const extractorButtons = document.getElementById('extractorButtons');
+    finalGroupedEmailsData = {}; // Reset global data
+
+    emailListsContainer.innerHTML = '';
+    resultSummary.textContent = 'Processing files...';
+    extractorButtons.style.display = 'none';
+
+    if (!files.length) {
+        resultSummary.textContent = 'Select files to begin extraction.';
+        return;
+    }
+
+    let totalUniqueEmails = 0;
+    let totalEmailsInFiles = 0;
+
+    try {
+        for (const file of files) {
+            const fileEmailsByList = await processFile(file);
+            let fileTotal = 0;
+
+            // Merge file results into the global result
+            for (const listName in fileEmailsByList) {
+                if (!finalGroupedEmailsData[listName]) {
+                    finalGroupedEmailsData[listName] = [];
+                }
+
+                // Add unique emails from this file's list to the global list
+                fileEmailsByList[listName].forEach(email => {
+                    if (!finalGroupedEmailsData[listName].includes(email)) {
+                        finalGroupedEmailsData[listName].push(email);
+                        totalUniqueEmails++;
+                    }
+                    fileTotal++;
+                });
+
+                // Display individual file/list results
+                const listEl = document.createElement('div');
+                listEl.className = 'list-group';
+                listEl.innerHTML = `
+                    <div class="list-name">${listName} (${finalGroupedEmailsData[listName].length} unique emails)</div>
+                    <ul class="email-list">
+                        ${Array.from(fileEmailsByList[listName]).map(e=>`<li>${e}</li>`).join('')}
+                    </ul>
+                    <p class="info">Extracted ${fileEmailsByList[listName].size} unique emails from ${file.name} for this list.</p>
+                `;
+                emailListsContainer.appendChild(listEl);
+            }
+            totalEmailsInFiles += fileTotal;
         }
 
-        function copyToClipboard() {
-            const userAgent = document.getElementById("userAgent").textContent;
-            navigator.clipboard.writeText(userAgent).then(() => {
-                alert("User-Agent copied to clipboard!");
-            }).catch(err => {
-                console.error("Failed to copy text: ", err);
-            });
+        resultSummary.innerHTML = `Extraction complete: <strong>${totalUniqueEmails} total unique emails</strong> across all files, from ${Object.keys(finalGroupedEmailsData).length} lists.`;
+        if (totalUniqueEmails > 0) {
+            extractorButtons.style.display = 'flex';
         }
-    </script>
 
+    } catch (error) {
+        console.error("Extraction error:", error);
+        resultSummary.innerHTML = `<span class="error">Error processing files: ${error.message}</span>`;
+    }
+};
+
+document.getElementById('extractorCopyButton').onclick = () => {
+    const allEmails = [];
+    for (const list in finalGroupedEmailsData) {
+        allEmails.push(...finalGroupedEmailsData[list]);
+    }
+    const textToCopy = Array.from(new Set(allEmails)).join('\n'); // Ensure only unique emails are copied
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        const button = document.getElementById('extractorCopyButton');
+        button.textContent = 'Copied!';
+        setTimeout(() => button.textContent = 'Copy All', 1200);
+    });
+};
+
+document.getElementById('extractorDownloadTxtButton').onclick = () => {
+    if (Object.keys(finalGroupedEmailsData).length === 0) return alert('No emails to download.');
+    // Download one file per list name
+    for (const l in finalGroupedEmailsData) {
+        const content = finalGroupedEmailsData[l].join('\n');
+        downloadFile(content, `${l}.txt`);
+    }
+}
+
+/* === TOOL 2: Email Combinator === */
+let combinatorFetchedNames = [];
+// Placeholder for combinator name fetching - assuming functional implementation exists outside this snippet
+if (typeof fetchRandomNames !== 'function') {
+    window.fetchRandomNames = async () => {}; // Mock function to prevent errors if not implemented
+}
+
+document.getElementById('combinatorGenerateBtn').onclick = () => {
+    const usernames = document
+        .getElementById('combinatorUsernameInput')
+        .value.split(';')
+        .map(u => u.trim())
+        .filter(Boolean);
+    const domains = document
+        .getElementById('combinatorDomainInput')
+        .value.split('\n')
+        .map(d => d.trim())
+        .filter(Boolean);
+    const manualEmails = document
+        .getElementById('combinatorManualEmailInput')
+        .value.split('\n')
+        .map(e => e.trim())
+        .filter(Boolean);
+
+    const all = new Set(manualEmails);
+
+    for (const u of usernames) {
+        for (const d of domains) {
+            all.add(`${u}@${d}`.toLowerCase());
+        }
+    }
+
+    document.getElementById('combinatorOutputArea').value = Array.from(all).join('\n');
+};
+
+document.getElementById('combinatorCopyBtn').onclick = () => {
+    copyTextFromElement(
+        document.getElementById('combinatorOutputArea'),
+        document.getElementById('combinatorCopyBtn'),
+        'Copy All'
+    );
+};
+
+document.getElementById('combinatorDownloadCsvBtn').onclick = async () => {
+    const emails = document
+        .getElementById('combinatorOutputArea')
+        .value.split('\n')
+        .filter(Boolean);
+    if (!emails.length) return alert('Generate emails first.');
+
+    // Fetch enough random names
+    if (combinatorFetchedNames.length < emails.length) {
+        await fetchRandomNames(emails.length);
+    } 
+
+    if (emails.length > 0 && combinatorFetchedNames.length === 0) {
+        // Fallback for CSV generation without names
+        const csvContent = emails.map(email => Array(5).fill(csvEscape('')).join(',') + csvEscape(email) + Array(28).fill(csvEscape('')).join(',')).join('\n');
+        const header = "First Name,Middle Name,Last Name,Company,Job Title,Email,Home Email,Work Email,Phone,Home,Work,Pager,Fax,Mobile,Other,Home Address,Home City,Home State,Home ZIP,Home Country,Work Address,Work City,Work State,Work ZIP,Work Country,Job Company,Notes,Birthday,Anniversary,Website,Relationship,Categories,Gender,Language,Preferred Time Zone\n";
+        downloadFile(header + csvContent, 'combined_emails.csv');
+        return;
+    }
+
+    // Full logic for CSV generation (assuming names are fetched)
+    const csvRows = emails.map((email, index) => {
+        const nameData = combinatorFetchedNames[index] || {}; // Use fetched name or empty object
+        const row = [
+            csvEscape(nameData.firstName || ''),
+            csvEscape(nameData.middleName || ''),
+            csvEscape(nameData.lastName || ''),
+            csvEscape(''), // Company
+            csvEscape(''), // Job Title
+            csvEscape(email), // Email
+            csvEscape(''), // Home Email
+            csvEscape(''), // Work Email
+            csvEscape(''), // Phone
+            csvEscape(''), // Home
+            csvEscape(''), // Work
+            csvEscape(''), // Pager
+            csvEscape(''), // Fax
+            csvEscape(''), // Mobile
+            csvEscape(''), // Other
+            csvEscape(''), // Home Address
+            csvEscape(''), // Home City
+            csvEscape(''), // Home State
+            csvEscape(''), // Home ZIP
+            csvEscape(''), // Home Country
+            csvEscape(''), // Work Address
+            csvEscape(''), // Work City
+            csvEscape(''), // Work State
+            csvEscape(''), // Work ZIP
+            csvEscape(''), // Work Country
+            csvEscape(''), // Job Company
+            csvEscape(''), // Notes
+            csvEscape(''), // Birthday
+            csvEscape(''), // Anniversary
+            csvEscape(''), // Website
+            csvEscape(''), // Relationship
+            csvEscape(''), // Categories
+            csvEscape(''), // Gender
+            csvEscape(''), // Language
+            csvEscape(''), // Preferred Time Zone
+        ];
+        return row.join(',');
+    });
+
+    const header = "First Name,Middle Name,Last Name,Company,Job Title,Email,Home Email,Work Email,Phone,Home,Work,Pager,Fax,Mobile,Other,Home Address,Home City,Home State,Home ZIP,Home Country,Work Address,Work City,Work State,Work ZIP,Work Country,Job Company,Notes,Birthday,Anniversary,Website,Relationship,Categories,Gender,Language,Preferred Time Zone\n";
+    downloadFile(header + csvRows.join('\n'), 'combined_emails.csv');
+};
+
+
+/* === TOOL 3: Filtered XLSX Extractor === */
+function readExcelFile(file){
+    return new Promise((res,rej)=>{
+        const r=new FileReader();
+        r.onload=e=>{
+            try{
+                const data=new Uint8Array(e.target.result);
+                const wb=XLSX.read(data,{type:'array'});
+                res(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));
+            }catch(err){
+                rej(err);
+            }
+        };
+        r.readAsArrayBuffer(file);
+    });
+}
+
+function findEmailsInRow(row){
+    const re=/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+    const s=new Set();
+    for(const c of row){
+        const m=String(c||'').match(re);
+        if(m)m.forEach(x=>s.add(x.toLowerCase()));
+    }
+    return Array.from(s);
+}
+
+document.getElementById('filteredParseBtn').onclick=async()=>{
+    const files=Array.from(document.getElementById('filteredFileInput').files);
+    const phrase=document.getElementById('filteredPhrase').value.trim();
+    const out=document.getElementById('filteredResultEmails');
+    const status=document.getElementById('filteredExportStatus');
+    if(!files.length){status.textContent='Select files.';return;}
+    const all=new Set();
+
+    try {
+        for(const f of files){
+            const rows=await readExcelFile(f);
+            for(const row of rows){
+                const txt=row.join(' ');
+                if(txt.includes(phrase)){
+                    findEmailsInRow(row).forEach(x=>all.add(x));
+                }
+            }
+        }
+        const unique = Array.from(all).sort();
+        out.value = unique.join('\n');
+        status.textContent = `${unique.length} unique emails found.`;
+    } catch(err) {
+        console.error("Filtered tool error:", err);
+        status.innerHTML = '<span class="error">Error processing file(s). Check console.</span>';
+    }
+};
+
+document.getElementById('filteredCopyBtn').onclick = () => {
+    copyTextFromElement(
+        document.getElementById('filteredResultEmails'),
+        document.getElementById('filteredCopyBtn'),
+        'Copy All'
+    );
+};
+
+document.getElementById('filteredShuffleBtn').onclick = () => {
+    const emails = document
+        .getElementById('filteredResultEmails')
+        .value.split('\n')
+        .map(e => e.trim())
+        .filter(Boolean);
+
+    if (emails.length === 0) return alert('No emails to shuffle.');
+
+    // Fisher-Yates (Knuth) shuffle algorithm
+    for (let i = emails.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [emails[i], emails[j]] = [emails[j], emails[i]];
+    }
+
+    document.getElementById('filteredResultEmails').value = emails.join('\n');
+    document.getElementById('filteredExportStatus').textContent = `Shuffled ${emails.length} emails.`;
+};
+
+
+document.getElementById('filteredExportBtn').onclick = () => {
+    const emails = document
+        .getElementById('filteredResultEmails')
+        .value.split('\n')
+        .map(e => e.trim())
+        .filter(Boolean);
+    const lineCount = parseInt(document.getElementById('filteredSplitLines').value);
+    const status = document.getElementById('filteredExportStatus');
+
+    if (!emails.length) return alert('No emails to export.');
+    if (isNaN(lineCount) || lineCount < 1) return alert('Invalid line count.');
+
+    let downloadCount = 0;
+    for (let i = 0; i < emails.length; i += lineCount) {
+        const part = emails.slice(i, i + lineCount);
+        const partIndex = Math.floor(i / lineCount) + 1;
+        const filename = `Part${partIndex}.txt`;
+        downloadFile(part.join('\n'), filename);
+        downloadCount++;
+    }
+
+    status.innerHTML = `<span style="color: #28a745; font-weight: bold;">Export Complete!</span> Downloaded ${downloadCount} files of ${lineCount} lines each.`;
+};
+
+
+document.getElementById('filteredNewExportBtn').onclick = () => {
+    const emails = document
+        .getElementById('filteredResultEmails')
+        .value.split('\n')
+        .map(e => e.trim())
+        .filter(Boolean);
+
+    if (!emails.length) return alert('No emails to export.');
+
+    const status = document.getElementById('filteredExportStatus');
+    status.innerHTML = 'Exporting sub-batches... Please wait.';
+
+    const date = new Date();
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const day = pad2(date.getDate());
+    // JS month is 0-indexed
+    const month = pad2(date.getMonth() + 1);
+    const dateTag = `${day}-${month}`;
+
+    // Define main batch counts
+    const BATCH_1_COUNT = 700;
+    const BATCH_2_COUNT = 2000;
+    const BATCH_3_COUNT = 1400;
+
+    // 1. Shuffle the emails array
+    const shuffledEmails = [...emails];
+    // Fisher-Yates (Knuth) shuffle algorithm
+    for (let i = shuffledEmails.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledEmails[i], shuffledEmails[j]] = [shuffledEmails[j], shuffledEmails[i]];
+    }
+
+    // 2. Define the subsets
+    const allSeedsContent = emails.join('\n'); // Original list for 'Add Contact All'
+
+    const endOfBatch1 = BATCH_1_COUNT; // 700
+    const endOfBatch2 = endOfBatch1 + BATCH_2_COUNT; // 2700
+    const endOfBatch3 = endOfBatch2 + BATCH_3_COUNT; // 4100
+
+    // Slice the shuffled list into the four main batches
+    const randomSelenium1 = shuffledEmails.slice(0, endOfBatch1);
+    const randomSelenium2 = shuffledEmails.slice(endOfBatch1, endOfBatch2);
+    const randomSelenium3 = shuffledEmails.slice(endOfBatch2, endOfBatch3);
+    const randomSelenium4 = shuffledEmails.slice(endOfBatch3); // The rest
+
+    // 3. Define batches for splitting and downloading based on the user's table
+    const batches = [
+        { name: 'Selenium1', data: randomSelenium1, size: 70 }, // 700 / 70 = 10 files
+        { name: 'Selenium2', data: randomSelenium2, size: 200 }, // 2000 / 200 = 10 files
+        { name: 'Selenium3', data: randomSelenium3, size: 140 }, // 1400 / 140 = 10 files
+        { name: 'Selenium4', data: randomSelenium4, size: 200 }, // Remaining / 200
+    ];
+
+    let downloadCount = 0;
+
+    // DOWNLOAD 1: Master file
+    downloadFile(allSeedsContent, `Add Contact All ${dateTag}.txt`);
+    downloadCount++;
+
+    // DOWNLOAD 2: The four main batch files (e.g., Selenium1 13-11.txt)
+    batches.forEach(batch => {
+        if (batch.data.length > 0) {
+            const content = batch.data.join('\n');
+            const filename = `${batch.name} ${dateTag}.txt`; 
+            downloadFile(content, filename);
+            downloadCount++;
+        }
+    });
+
+    // DOWNLOAD 3: The sub-files (e.g., Selenium1_D1.txt)
+    batches.forEach(batch => {
+        const chunks = chunkArray(batch.data, batch.size);
+        chunks.forEach((chunk, index) => {
+            const fileIndex = index + 1; // D1, D2, ...
+            const chunkContent = chunk.join('\n');
+            const chunkFilename = `${batch.name}_D${fileIndex}.txt`;
+            downloadFile(chunkContent, chunkFilename);
+            downloadCount++;
+        });
+    });
+
+    // Provide a detailed summary of the files downloaded
+    const batchSummary = batches.map(b => `${b.name}: ${Math.ceil(b.data.length / b.size)} files`).join(', ');
+    status.innerHTML = `<span style="color: #28a745; font-weight: bold;">Export Complete!</span> Downloaded ${downloadCount} files (Total Sub-files: ${batchSummary}).`;
+};
+
+/* === TOOL 4: ID Pairing Scheduler === */
+// Helper function to format time
+function pad2(n) { return String(n).padStart(2, '0'); }
+
+// Helper function to generate schedule text
+function generateSchedulerText(ids, startHour, startMinute) {
+    const lines = [];
+    let hour = startHour;
+    let minute = startMinute;
+
+    // Pair IDs (a, b, c, d, ... -> (a,b), (c,d), ...)
+    for (let i = 0; i < ids.length; i += 2) {
+        const a = ids[i];
+        const b = ids[i + 1] || ''; // 'b' might be empty if there's an odd number of IDs
+
+        lines.push(`${pad2(hour)}h${pad2(minute)} : ${a}${b ? ' + ' + b : ''}`);
+
+        // Increment time by 1 hour
+        hour = (hour + 1) % 24;
+    }
+    return lines.join('\n');
+}
+
+document.getElementById('schedulerGenerate').onclick = () => {
+    const ids = document
+        .getElementById('schedulerInputIds')
+        .value.split(/\r?\n/)
+        .map(x => x.trim())
+        .filter(Boolean);
+    const reverse = document.getElementById('schedulerReverse').checked;
+    const hour = parseInt(document.getElementById('schedulerStartHour').value) || 0;
+    const minute = parseInt(document.getElementById('schedulerMinute').value) || 0;
+    const arr = reverse ? ids.reverse() : ids;
+    const txt = generateSchedulerText(arr, hour, minute);
+    document.getElementById('schedulerOutput').textContent = txt;
+};
+
+document.getElementById('schedulerCopy').onclick = () => {
+    copyTextFromElement(
+        document.getElementById('schedulerOutput'),
+        document.getElementById('schedulerCopy'),
+        'Copy'
+    );
+};
+
+document.getElementById('schedulerDownload').onclick = () => {
+    const content = document.getElementById('schedulerOutput').textContent.trim();
+    if (!content) return alert('No schedule generated.');
+    downloadFile(content, 'paired_schedule.txt');
+};
+
+document.getElementById('schedulerClear').onclick = () => {
+    document.getElementById('schedulerInputIds').value = '';
+    document.getElementById('schedulerOutput').textContent = '';
+};
+
+});
+</script>
 </body>
 </html>
