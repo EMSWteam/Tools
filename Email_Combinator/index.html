@@ -176,7 +176,8 @@ pre { white-space: pre-wrap; font-family: monospace; }
             <div class="actions-group" id="extractorButtons" style="display:none">
                 <button id="extractorCopyButton" class="btn btn-secondary">Copy All</button>
                 <button id="extractorDownloadTxtButton" class="btn btn-success">Download TXT</button>
-            </div>
+                <button id="extractorDownloadAllTxtButton" class="btn btn-success">Download All TXT</button>
+                </div>
             <div id="emailListsContainer"></div>
         </div>
     </div>
@@ -302,6 +303,10 @@ function chunkArray(array, size) {
 /* === TOOL 1: Multi-file Extractor - CORRECTED LOGIC === */
 const EMAIL_COL_INDEX=0,LIST_NAME_COL_INDEX=4,STATUS_COL_INDEX=6,SUCCESS_STATUS="Successfully connected";
 let finalGroupedEmailsData={};
+// START OF MODIFICATION: New Set to track all unique emails
+let allExtractedEmailsSet = new Set();
+// END OF MODIFICATION
+
 document.getElementById('extractorExtractButton').onclick=()=>{
  const files=document.getElementById('extractorFileInput').files;
  const resultSummary=document.getElementById('extractorResultSummary');
@@ -311,6 +316,9 @@ document.getElementById('extractorExtractButton').onclick=()=>{
  resultContainer.innerHTML='';buttonsDiv.style.display='none';resultSummary.textContent='Processing...';
  finalGroupedEmailsData={};
  const allGroupedEmails={};
+ // START OF MODIFICATION: Clear the global set on new extraction
+ allExtractedEmailsSet.clear();
+ // END OF MODIFICATION
  const promises=[];
 
  for(let f of files){
@@ -348,7 +356,13 @@ document.getElementById('extractorExtractButton').onclick=()=>{
  Promise.allSettled(promises).then(()=>{
   const finalGrouped={};
   let total=0;
-  for(const k in allGroupedEmails){finalGrouped[k]=Array.from(allGroupedEmails[k]);total+=finalGrouped[k].length;}
+  for(const k in allGroupedEmails){
+      finalGrouped[k]=Array.from(allGroupedEmails[k]);
+      total+=finalGrouped[k].length;
+      // START OF MODIFICATION: Populate the set with all unique emails
+      finalGrouped[k].forEach(email => allExtractedEmailsSet.add(email));
+      // END OF MODIFICATION
+  }
   finalGroupedEmailsData=finalGrouped;
   displayExtractorResults(finalGrouped);
   resultSummary.textContent=`Processed ${files.length} files, total ${total} emails.`;
@@ -390,6 +404,16 @@ document.getElementById('extractorCopyButton').onclick=()=>{
 document.getElementById('extractorDownloadTxtButton').onclick=()=>{
  for(const l in finalGroupedEmailsData){const content=finalGroupedEmailsData[l].join('\n');downloadFile(content,`${l}.txt`);}
 }
+// START OF MODIFICATION: New click handler for Download All TXT button
+document.getElementById('extractorDownloadAllTxtButton').onclick=()=>{
+    const allEmails = Array.from(allExtractedEmailsSet).join('\n');
+    if(allEmails) {
+        downloadFile(allEmails, 'All_Extracted_Emails.txt');
+    } else {
+        document.getElementById('extractorResultSummary').innerHTML = '<span class="error">No emails to download.</span>';
+    }
+}
+// END OF MODIFICATION
 
 /* === TOOL 2: Filtered XLSX Extractor === */
 function readExcelFile(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>{try{const data=new Uint8Array(e.target.result);const wb=XLSX.read(data,{type:'array'});res(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));}catch(err){rej(err);}};r.readAsArrayBuffer(file);});}
