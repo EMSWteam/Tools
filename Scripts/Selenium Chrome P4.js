@@ -1,65 +1,126 @@
-// =======================================================
-// ================ CONFIGURATION SECTION =================
-// =======================================================
+// ============================================
+// FINAL CONFIGURATION (Tabs 2 through 6)
+// ============================================
 
-// Ask user for Start Hour
-var F_h = parseInt(ask("Enter Start Hour (F_h):", 13), 10);
-if (isNaN(F_h) || F_h < 0 || F_h > 23) F_h = 13;
+// First and last tab number to process
+var START_TAB = 2; // Start at Tab 2 
+var END_TAB = 2; // End at Tab 6 (Maintains 5 tabs total: 2, 3, 4, 5, 6)
+var BATCH_SIZE = 2000; // Number of emails per tab
+var TABS_TO_USE = END_TAB - START_TAB + 1; // Calculated as 5
 
-// Auto-calculate End Hour = F_h + 9 (10 hours total)
-var AUTO_L_h = (F_h + 9) % 24;
+// --- LIST OF ALL AVAILABLE FILES ---
+var ALL_FILES = [
+    "Selenium4_D1.txt", "Selenium4_D2.txt", "Selenium4_D3.txt", "Selenium4_D4.txt", 
+    "Selenium4_D5.txt", "Selenium4_D6.txt", "Selenium4_D7.txt", "Selenium4_D8.txt", 
+    "Selenium4_D9.txt", "Selenium4_D10.txt"
+];
+// ==================================
 
-// Ask user for End Hour (pre-filled with AUTO_L_h)
-var L_h = parseInt(ask("Enter End Hour (L_h):", AUTO_L_h), 10);
-if (isNaN(L_h) || L_h < 0 || L_h > 23) L_h = AUTO_L_h;
+// Other original config variables
+var batch = 0; // System speed: Batch size
+var delay = 0; // System speed: Delay in milliseconds
+var ENABLE_TAB3_DEPLOYMENT = false; // Disabled old logic
 
-// Ask user for minute
-var M_m = parseInt(ask("Enter Minute (M_m):", 32), 10);
-if (isNaN(M_m) || M_m < 0 || M_m > 59) M_m = 32;
+// Hour Configuration 
+var now = new Date();
+var defaultHour = now.getHours();
+var defaultMinute = (now.getMinutes() + 2) % 60;
 
-// FIXED batch size for first 9 hours
-var FIXED_BATCH_SIZE = 200;
-
-// Maximum batches with fixed 9 hours
-var FIXED_BATCHES = 9;
-
-// Email file name (DATA SOURCE)
-var EMAIL_FILE = "selenium4.txt";
-
-// Tab configuration (always tab 2)
-var START_TAB = 2;
-var END_TAB = 2;
-
-// Execution speeds
-var batchSpeed = 0;
-var delaySpeed = 0;
-
-// =======================================================
-// ================ CODE START — DO NOT EDIT =============
-// =======================================================
-
-// UNIVERSAL PROMPT HANDLER
+// === UNIVERSAL PROMPT HANDLER ===
 function ask(question, defaultValue) {
     try {
-        if (typeof iimPrompt === "function") return iimPrompt(question, defaultValue);
-        if (typeof prompt === "function") return prompt(question, defaultValue);
-    } catch (e) {}
-    return defaultValue;
+        if (typeof iimPrompt === "function") {
+            return iimPrompt(question, defaultValue);
+        } else if (typeof prompt === "function") {
+            return prompt(question, defaultValue);
+        } else {
+            return defaultValue;
+        }
+    } catch (e) {
+        return defaultValue;
+    }
 }
 
-// Padding helper
-function pad2(n) { return (n < 10 ? "0" : "") + n; }
+// Hour input configuration
+var F_h = parseInt(ask("Enter Start Hour (F_h) in 24h format:", 12), 10);
+var L_h = parseInt(ask("Enter End Hour (L_h) in 24h format:", 16), 10);
+var M_m = parseInt(ask("Enter a Minute (M_m) for the Launch At time:", 30), 10);
 
-// Read all emails from file
+// --- DYNAMIC FILE SELECTION LOGIC ---
+var filePrompt = 
+"Choose the STARTING Email File (1-10):\n" +
+"1: Selenium4_D1\n2: Selenium4_D2\n3: Selenium4_D3\n" +
+"4: Selenium4_D4\n5: Selenium4_D5\n6: Selenium4_D6\n" +
+"7: Selenium4_D7\n8: Selenium4_D8\n9: Selenium4_D9\n10: Selenium4_D10";
+
+var fileSelection = parseInt(ask(filePrompt, 1), 10);
+if (fileSelection < 1 || fileSelection > 10) {
+    fileSelection = 1; // Default to D1 if input is invalid
+}
+
+// 1. GENERATE HOUR SEQUENCE
+var hours = [];
+if (F_h <= L_h) {
+    for (var h = F_h; h <= L_h; h++) {
+        hours.push(h);
+    }
+} else {
+    for (var h = F_h; h < 24; h++) {
+        hours.push(h);
+    }
+    for (var h = 0; h <= L_h; h++) {
+        hours.push(h);
+    }
+}
+var totalHours = hours.length;
+
+// 2. DYNAMICALLY CREATE FILES_TO_PROCESS ARRAY
+var FILES_TO_PROCESS = [];
+var startIndex = fileSelection - 1; // Array index starts at 0
+
+for (var i = 0; i < totalHours; i++) {
+    // Cycle through ALL_FILES using modulo 10
+    var fileIndex = (startIndex + i) % ALL_FILES.length;
+    FILES_TO_PROCESS.push(ALL_FILES[fileIndex]);
+}
+
+var maxFilesToProcess = Math.min(FILES_TO_PROCESS.length, totalHours);
+
+// --- ALERT SHOWING FILE-TO-HOUR MAPPING (Initial Confirmation) ---
+var scheduleAlert = "Deployment Schedule (1 File per Hour):\n" +
+                    "Tabs Used: " + START_TAB + " to " + END_TAB + " (" + TABS_TO_USE + " total)\n" +
+                    "Starting File: " + ALL_FILES[startIndex] + "\n\n";
+
+for (var i = 0; i < maxFilesToProcess; i++) {
+    var h = hours[i];
+    var padHour = (h < 10 ? "0" : "") + h;
+    var padMinute = (M_m < 10 ? "0" : "") + M_m;
+    
+    scheduleAlert += padHour + ":" + padMinute + " -> " + FILES_TO_PROCESS[i] + "\n";
+}
+
+if (FILES_TO_PROCESS.length > totalHours) {
+    scheduleAlert += "\n⚠️ WARNING: Not enough hours (" + totalHours + ") defined to cover all files (" + FILES_TO_PROCESS.length + "). Only the first " + totalHours + " files will be processed.";
+}
+
+alert(scheduleAlert);
+
+// === UTILITY FUNCTIONS ===
 function GetAllLinesArray(file) {
-    var list = [], i = 1;
+    if (!file) return [];
+    var list = [];
+    var i = 1;
     while (true) {
         var macro = "CODE:";
         macro += 'SET !DATASOURCE "' + file + '"\n';
         macro += "SET !LOOP " + i + "\n";
         macro += "ADD !EXTRACT {{!COL1}}\n";
-        try { iimPlay(macro); } catch (e) { break; }
-        var line = iimGetLastExtract();
+        try {
+            iimPlay(macro);
+        } catch (e) {
+            break;
+        }
+        var line = iimGetLastExtract ? iimGetLastExtract() : null;
         if (!line || line === "#EANF#") break;
         list.push(line);
         i++;
@@ -67,96 +128,100 @@ function GetAllLinesArray(file) {
     return list;
 }
 
-// Dynamic launch time
+function pad2(n) {
+    return (n < 10 ? "0" : "") + n;
+}
+
 function getDynamicLaunchAt(H, M) {
     var now = new Date();
-    var launch = new Date(now.getFullYear(), now.getMonth(), now.getDate(), H, M, 0);
-    if (launch.getTime() < now.getTime()) launch.setDate(launch.getDate() + 1);
-    return '"' + launch.getFullYear() + "-" + pad2(launch.getMonth() + 1) + "-" +
-        pad2(launch.getDate()) + " " + pad2(launch.getHours()) + ":" +
-        pad2(launch.getMinutes()) + '"';
+    var launchDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), H, M, 0);
+    if (launchDate.getTime() < now.getTime()) {
+        launchDate.setDate(launchDate.getDate() + 1);
+    }
+    var yyyy = launchDate.getFullYear();
+    var mm = pad2(launchDate.getMonth() + 1);
+    var dd = pad2(launchDate.getDate());
+    var hh = pad2(launchDate.getHours());
+    var min = pad2(launchDate.getMinutes());
+    return '"' + yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + '"';
 }
 
-// iMacros base configuration
-var init = "CODE:";
-init += "SET !ERRORIGNORE YES\n";
-init += "SET !TIMEOUT_PAGE 10\n";
-init += "SET !TIMEOUT_STEP 3\n";
-init += "SET !WAITPAGECOMPLETE YES\n";
-init += "SET !REPLAYSPEED FAST\n";
-init += "TAB T=1\n";
+// === MAIN SCRIPT ===
 
-// Read all emails
-var allEmails = GetAllLinesArray(EMAIL_FILE);
-var totalEmails = allEmails.length;
+var initGlobal = "CODE:";
+initGlobal += "SET !ERRORIGNORE YES\n";
+initGlobal += "SET !TIMEOUT_STEP 3\n";
+initGlobal += "SET !TIMEOUT_PAGE 10\n";
+initGlobal += "SET !WAITPAGECOMPLETE YES\n";
+initGlobal += "SET !REPLAYSPEED FAST\n";
+// initGlobal += "TAB T=1\n"; // Removed from initGlobal to allow it to be placed inside the macro for better control
 
-if (totalEmails === 0) {
-    alert("❌ No emails found in file: " + EMAIL_FILE);
-    throw new Error("Empty file");
-}
+var totalBatchesProcessed = 0;
 
-// ===== Build hours list: 10 hours =====
-var hours = [];
-if (F_h <= L_h) {
-    for (var h = F_h; h <= L_h; h++) hours.push(h);
-} else {
-    for (var h = F_h; h < 24; h++) hours.push(h);
-    for (var h = 0; h <= L_h; h++) hours.push(h);
-}
+// 3. Loop over the files to process (1 file per hour)
+for (var fileIndex = 0; fileIndex < maxFilesToProcess; fileIndex++) {
+    
+    var currentFile = FILES_TO_PROCESS[fileIndex];
+    var currentLaunchHour = hours[fileIndex];
 
-// Force exactly 10 hours
-hours = hours.slice(0, 10);
+    // 3A. READ EMAILS FOR THIS FILE
+    var allEmails = [];
+    try {
+        allEmails = GetAllLinesArray(currentFile);
+    } catch (e) {
+        alert("⚠️ Error reading file: " + currentFile);
+        continue; // Skip to the next file
+    }
 
-// ===== Prepare batches =====
-var batches = [];
+    var totalEmails = allEmails.length;
+    if (totalEmails === 0) {
+        alert("Error: No emails found in " + currentFile);
+        continue; // Skip to the next file
+    }
 
-// First 9 batches = 200 emails each
-for (var i = 0; i < FIXED_BATCHES; i++) {
-    var startIndex = i * FIXED_BATCH_SIZE;
-    var endIndex = startIndex + FIXED_BATCH_SIZE;
+    var totalBatchesForFile = Math.ceil(totalEmails / BATCH_SIZE);
 
-    if (startIndex >= totalEmails) break;
+    // 3B. Loop over all batches for the current file
+    for (var i = 0; i < totalBatchesForFile; i++) {
 
-    batches.push({
-        hour: hours[i],
-        emails: allEmails.slice(startIndex, Math.min(endIndex, totalEmails))
-    });
-}
+        // Determine the current tab (Cycles 2, 3, 4, 5, 6)
+        var currentTab = START_TAB + (i % TABS_TO_USE); 
 
-// Last batch = remaining emails
-var remainingStart = FIXED_BATCHES * FIXED_BATCH_SIZE;
-var remainingEmails = allEmails.slice(remainingStart);
+        // Calculate email range
+        var startIndex = i * BATCH_SIZE;
+        var endIndex = Math.min(startIndex + BATCH_SIZE, totalEmails);
+        var emailBatch = allEmails.slice(startIndex, endIndex).join("\\n");
+        if (emailBatch.length === 0) break;
 
-if (remainingEmails.length > 0) {
-    batches.push({
-        hour: hours[FIXED_BATCHES],
-        emails: remainingEmails
-    });
-}
+        // Get the dynamic launch time (all batches from this file use the same hour)
+        var launchAt = getDynamicLaunchAt(currentLaunchHour, M_m);
 
-// ===== Execute deployment =====
-for (var b = 0; b < batches.length; b++) {
-
-    var emailBatch = batches[b].emails.join("\\n");
-    var launchAt = getDynamicLaunchAt(batches[b].hour, M_m);
-
-    var macro = init;
-    macro += "TAB T=" + START_TAB + "\n";
+        // Build macro string
+    var macro = initGlobal;
+    macro += "TAB T=" + currentTab + "\n";
+	macro += "TAG POS=5 TYPE=BUTTON ATTR=TXT:Close\n";
 	macro += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=ID:deploy-form ATTR=ID:rcpt-to-switcher CONTENT=YES\n";
-    macro += "WAIT SECONDS=1\n";
-    macro += 'TAG POS=1 TYPE=TEXTAREA FORM=ID:deploy-form ATTR=ID:rcpt_to CONTENT="' + emailBatch + '"\n';
+	macro += "WAIT SECONDS=1\n";
+    // macro += 'TAG POS=1 TYPE=INPUT:TEXT FORM=ID:deploy-form ATTR=ID:rcpt_to CONTENT="' + emailBatch + '"\n';
+	macro += 'TAG POS=1 TYPE=TEXTAREA FORM=ID:deploy-form ATTR=ID:rcpt_to CONTENT="' + emailBatch + '"\n';
     macro += "TAG POS=21 TYPE=SPAN ATTR=CLASS:bootstrap-switch-handle-off<SP>bootstrap-switch-danger&&TXT:No\n";
     macro += "WAIT SECONDS=1\n";
     macro += 'TAG POS=1 TYPE=INPUT:TEXT FORM=ID:deploy-form ATTR=PLACEHOLDER:Launch<SP>At&&NAME:launch_at CONTENT=' + launchAt + '\n';
     macro += "WAIT SECONDS=1\n";
-    macro += "TAG POS=1 TYPE=INPUT:NUMBER FORM=ID:deploy-form ATTR=ID:batch CONTENT=" + batchSpeed + "\n";
-    macro += "TAG POS=1 TYPE=INPUT:NUMBER FORM=ID:deploy-form ATTR=ID:delay CONTENT=" + delaySpeed + "\n";
+    macro += "TAG POS=1 TYPE=INPUT:NUMBER FORM=ID:deploy-form ATTR=ID:batch&&NAME:system_speed[batch] CONTENT=" + batch + "\n";
+    macro += "TAG POS=1 TYPE=INPUT:NUMBER FORM=ID:deploy-form ATTR=ID:delay&&NAME:system_speed[delay] CONTENT=" + delay + "\n";
     macro += "TAG POS=1 TYPE=SELECT FORM=ID:deploy-form ATTR=ID:send_mode&&NAME:send_mode CONTENT=%non_blocking\n";
     macro += "TAG POS=1 TYPE=BUTTON FORM=ID:deploy-form ATTR=TYPE:submit&&CLASS:btn<SP>btn-default<SP>submit&&DATA-ACTION-TYPE:test_ips&&VALUE:test_ips&&NAME:action_type\n";
     macro += "WAIT SECONDS=1\n";
-    macro += "TAB T=1\n"
+    macro += "TAB T=1\n";
 
-    iimPlay(macro);
+        try {
+            iimPlay(macro);
+        } catch (e) {
+            alert("Batch " + (totalBatchesProcessed + 1) + " failed: " + e.message + " (File: " + currentFile + ")");
+        }
+        totalBatchesProcessed++;
+    }
 }
 
-alert("✅ Deployment Complete!\nTotal emails: " + totalEmails + "\nBatches: " + batches.length);
+alert("✅ Deployment script finished.\nTotal batches processed: " + totalBatchesProcessed + " batches from " + maxFilesToProcess + " files.");
