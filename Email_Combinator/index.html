@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Combined Email & Data Tools</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root {
     --background-color: #FBF8F4;
@@ -24,7 +25,7 @@ body {
     background: var(--background-color);
     color: var(--text-color);
     margin: 0;
-    min-height: 100vh;
+    min-height: 10vh;
     display: flex;
     flex-direction: column;
 }
@@ -284,6 +285,20 @@ function copyTextFromElement(element,button,originalText){
     });
 }
 
+/**
+ * Splits an array into chunks of a specified size.
+ * @param {Array<T>} array - The array to chunk.
+ * @param {number} size - The size of each chunk.
+ * @returns {Array<Array<T>>} An array of chunks.
+ */
+function chunkArray(array, size) {
+    const chunkedArr = [];
+    for (let i = 0; i < array.length; i += size) {
+        chunkedArr.push(array.slice(i, i + size));
+    }
+    return chunkedArr;
+}
+
 /* === TOOL 1: Multi-file Extractor - CORRECTED LOGIC === */
 const EMAIL_COL_INDEX=0,LIST_NAME_COL_INDEX=4,STATUS_COL_INDEX=6,SUCCESS_STATUS="Successfully connected";
 let finalGroupedEmailsData={};
@@ -445,6 +460,11 @@ document.getElementById('filteredExportBtn').onclick = () => {
 /* --- MODIFIED LOGIC: Filtered XLSX Email Extractor Export Seeds (5 Files: Selenium 1-4) --- */
 
 document.getElementById('filteredNewExportBtn').onclick = () => {
+    // Requires JSZip library to be loaded in the <head>
+    if (typeof JSZip === 'undefined') {
+        return alert('Error: JSZip library not loaded. Please ensure the JSZip script link is in your HTML <head> section.');
+    }
+    
     const emails = document
         .getElementById('filteredResultEmails').value
         .split('\n')
@@ -468,20 +488,15 @@ document.getElementById('filteredNewExportBtn').onclick = () => {
         return;
     }
     
+    status.innerHTML = 'Exporting and zipping sub-batches... Please wait.';
+
     // Get today's date in DD-MM format
     const today = new Date();
-    const day = String(today.getDate()).padStart(2, '0');
-    const month = String(today.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const day = pad2(today.getDate());
+    const month = pad2(today.getMonth() + 1); // Month is 0-indexed
     const dateTag = `${day}-${month}`;
     
-    // Define the new filenames (5 files)
-    const filenameAllSeeds = `Add Contact All ${dateTag}.txt`;
-    const filenameSelenium1 = `Selenium1 ${dateTag}.txt`; 
-    const filenameSelenium2 = `Selenium2 ${dateTag}.txt`;
-    const filenameSelenium3 = `Selenium3 ${dateTag}.txt`; 
-    const filenameSelenium4 = `Selenium4 ${dateTag}.txt`; // Contains 2000 + rest (which is just the 'rest' of the shuffled list)
-
-
     // 1. Shuffle the emails array
     const shuffledEmails = [...emails];
     for (let i = shuffledEmails.length - 1; i > 0; i--) {
@@ -490,33 +505,121 @@ document.getElementById('filteredNewExportBtn').onclick = () => {
     }
 
     // 2. Define the subsets
-    // All emails, delimited by newline (using original list for Add Contact All)
     const allSeedsContent = emails.join('\n'); 
     
-    const endOfBatch1 = BATCH_1_COUNT;        // 700
-    const endOfBatch2 = endOfBatch1 + BATCH_2_COUNT; // 2700
-    const endOfBatch3 = endOfBatch2 + BATCH_3_COUNT; // 4100
+    const endOfBatch1 = BATCH_1_COUNT;        
+    const endOfBatch2 = endOfBatch1 + BATCH_2_COUNT; 
+    const endOfBatch3 = endOfBatch2 + BATCH_3_COUNT; 
 
-    // First 700 emails (Index 0 to 700)
     const randomSelenium1 = shuffledEmails.slice(0, endOfBatch1);
-    
-    // Next 2000 emails (Index 700 to 2700)
     const randomSelenium2 = shuffledEmails.slice(endOfBatch1, endOfBatch2);
-    
-    // Next 1400 emails (Index 2700 to 4100)
     const randomSelenium3 = shuffledEmails.slice(endOfBatch2, endOfBatch3);
-    
-    // The rest of the emails (Index 4100 onwards)
     const randomSelenium4 = shuffledEmails.slice(endOfBatch3);
 
-    // 3. Download the files
-    downloadFile(allSeedsContent, filenameAllSeeds);
-    downloadFile(randomSelenium1.join('\n'), filenameSelenium1);
-    downloadFile(randomSelenium2.join('\n'), filenameSelenium2);
-    downloadFile(randomSelenium3.join('\n'), filenameSelenium3);
-    downloadFile(randomSelenium4.join('\n'), filenameSelenium4);
+    const batches = [
+        { name: 'Selenium1', data: randomSelenium1, size: 70 }, 
+        { name: 'Selenium2', data: randomSelenium2, size: 200 }, 
+        { name: 'Selenium3', data: randomSelenium3, size: 140 }, 
+        { name: 'Selenium4', data: randomSelenium4, size: 200 }, 
+    ];
+    
+    // --- ZIPPING LOGIC START: FOLDERS ---
+    const zip = new JSZip();
+    let fileCount = 0;
 
-    status.textContent = `Exported 5 files: ${filenameAllSeeds} (${emails.length}), ${filenameSelenium1} (${randomSelenium1.length}), ${filenameSelenium2} (${randomSelenium2.length}), ${filenameSelenium3} (${randomSelenium3.length}), ${filenameSelenium4} (${randomSelenium4.length})`;
+    // Create main folders
+    const toProdFolder = zip.folder("To Prod");
+    const datasourcesFolder = zip.folder("Datasources");
+
+    // 1. Master file (Add Contact All) goes to "To Prod"
+    toProdFolder.file(`Add Contact All ${dateTag}.txt`, allSeedsContent);
+    fileCount++;
+
+    // 2. The four main batch files (e.g., Selenium1 13-11.txt) go to "To Prod"
+    batches.forEach(batch => {
+        if (batch.data.length > 0) {
+            const content = batch.data.join('\n');
+            const filename = `${batch.name} ${dateTag}.txt`; 
+            toProdFolder.file(filename, content);
+            fileCount++;
+        }
+    });
+
+    // 3. The sub-files (e.g., Selenium1_D1.txt) go to "Datasources"
+    batches.forEach(batch => {
+        let chunks = [];
+        let finalS4Files = 0;
+        
+        // Custom logic for Selenium4: D1 to D9 are 200 lines, D10 is the remainder
+        if (batch.name === 'Selenium4') {
+            const data = batch.data;
+            const fullChunkCount = 9; // Max number of full files
+            const maxFullIndex = fullChunkCount * batch.size; // Max index for full files (1800)
+            
+            // 1. Get the first 9 chunks of size 200
+            for (let i = 0; i < fullChunkCount; i++) {
+                const start = i * batch.size;
+                if (start < data.length) {
+                    chunks.push(data.slice(start, start + batch.size));
+                }
+            }
+            // 2. Get the remainder for the D10 file
+            const remainder = data.slice(maxFullIndex);
+            if (remainder.length > 0) {
+                chunks.push(remainder);
+            }
+            // Max number of files is 10 (D1 to D10)
+            finalS4Files = chunks.length;
+
+        } else {
+            // Standard chunking for Selenium1, 2, 3
+            chunks = chunkArray(batch.data, batch.size);
+        }
+
+        chunks.forEach((chunk, index) => {
+            // D10 will contain the remainder for Selenium4, regardless of size
+            const fileIndex = index + 1; 
+            const chunkContent = chunk.join('\n');
+            const chunkFilename = `${batch.name}_D${fileIndex}.txt`;
+            datasourcesFolder.file(chunkFilename, chunkContent);
+            fileCount++;
+        });
+    });
+
+    // Generate the ZIP file
+    zip.generateAsync({type:"blob"})
+    .then(function(content) {
+        // Force download the zip file
+        const url = URL.createObjectURL(content);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Batch_Export_${dateTag}_${emails.length}_Seeds.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        // Update status
+        const s1Files = Math.ceil(batches[0].data.length / batches[0].size);
+        const s2Files = Math.ceil(batches[1].data.length / batches[1].size);
+        const s3Files = Math.ceil(batches[2].data.length / batches[2].size);
+        
+        // Recalculate S4 files accurately for display
+        const s4DataLength = batches[3].data.length;
+        const s4FullChunks = Math.min(9, Math.floor(s4DataLength / batches[3].size));
+        const s4Remainder = s4DataLength > s4FullChunks * batches[3].size;
+        const s4Files = s4FullChunks + (s4Remainder ? 1 : 0);
+        
+        const batchSummary = `Selenium1: ${s1Files}, Selenium2: ${s2Files}, Selenium3: ${s3Files}, Selenium4: ${s4Files} (Remainder in D${s4Files})`;
+
+        status.innerHTML = `<span style="color: #28a745; font-weight: bold;">Export Complete!</span> Downloaded <span style="font-weight: 700;">${fileCount} files</span> packaged in a single ZIP (Total Sub-files: ${batchSummary}).`;
+
+    })
+    .catch(error => {
+        status.innerHTML = `<span class="error">Error zipping files: ${error.message}</span>`;
+        console.error("Zipping error:", error);
+    });
+    // --- ZIPPING LOGIC END ---
 };
 
 /* === TOOL 3: Email Combinator === */
