@@ -134,10 +134,17 @@ function pad2(n) {
 
 function getDynamicLaunchAt(H, M) {
     var now = new Date();
+    // Creates a date object for the current day, using the specified H and M.
     var launchDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), H, M, 0);
+    
+    // --- MODIFICATION: COMMENTED OUT DATE ADVANCEMENT LOGIC ---
+    /*
     if (launchDate.getTime() < now.getTime()) {
         launchDate.setDate(launchDate.getDate() + 1);
     }
+    */
+    // -----------------------------------------------------------
+
     var yyyy = launchDate.getFullYear();
     var mm = pad2(launchDate.getMonth() + 1);
     var dd = pad2(launchDate.getDate());
