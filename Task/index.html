@@ -353,16 +353,29 @@ button:hover {
 <body>
 <div class="main-header-wrapper">
   <a
-    href="javascript:(function(){    const input = prompt('Paste formatted data (REPO, ranges, Count, Limit, Date):');    if (!input) return;    const lines = input.split('\n').map(l => l.trim()).filter(Boolean);    let currentRepo = '', repoData = {}, repoCount = {}, repoLimit = {}, dateRange = '';    const firstLine = lines[0];    lines.forEach(line => {        if (/^[A-Za-z0-9_]+$/.test(line) && !/Count|Limit/i.test(line)) {            currentRepo = line;            if (!repoData[currentRepo]) repoData[currentRepo] = [];            return;        }        const rangeMatch = line.match(/^(\d+)\s+to\s+(\d+)$/i);        if (rangeMatch) {            const start = parseInt(rangeMatch[1], 10);            const end = parseInt(rangeMatch[2], 10);            for (let i = start; i <= end; i++) {                repoData[currentRepo].push(i);            }        }        const countMatch = line.match(/^Count\s+(\d+)/i);        if (countMatch && currentRepo) {            repoCount[currentRepo] = countMatch[1];
+    href="javascript:(function(){    const input = prompt('Paste formatted data (REPO, ranges, Count, Limit, Date):');    if (!input) return;    const lines = input.split('\n').map(l => l.trim()).filter(Boolean);    let currentRepo = '', repoData = {}, repoCount = {}, repoLimit = {}, dateRange = '';    const firstLine = lines[0];    lines.forEach(line => {        if (/^[A-Za-z0-9_]+$/.test(line) && !/Count|Limit/i.test(line)) {            currentRepo = line;            if (!repoData[currentRepo]) repoData[currentRepo] = [];            return;
+        }        const rangeMatch = line.match(/^(\d+)\s+to\s+(\d+)$/i);        if (rangeMatch) {            const start = parseInt(rangeMatch[1], 10);            const end = parseInt(rangeMatch[2], 10);            for (let i = start; i <= end; i++) {                repoData[currentRepo].push(i);
+            }
+        }        const countMatch = line.match(/^Count\s+(\d+)/i);        if (countMatch && currentRepo) {            repoCount[currentRepo] = countMatch[1];
         }        const limitMatch = line.match(/^Limit\s+(\d+)/i);        if (limitMatch && currentRepo) {            repoLimit[currentRepo] = limitMatch[1];
         }        if (/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\s+to\s+\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(line)) {            dateRange = line;
-        }    });    const textareas = {        'REPO': document.getElementById('task_list_profiles_488') || document.getElementById('task_list_profiles_196') || document.getElementById('task_list_profiles_200'),        'REPO1': document.getElementById('task_list_profiles_489') || document.getElementById('task_list_profiles_540') || document.getElementById('task_list_profiles_450'),        'REPO2': document.getElementById('task_list_profiles_491') || document.getElementById('task_list_profiles_530'),        'REPO3': document.getElementById('task_list_profiles_492') || document.getElementById('task_list_profiles_559'),    };    Object.keys(repoData).forEach(repo => {        const textarea = textareas[repo];        if (textarea) {            textarea.value = repoData[repo].join('\n');            textarea.dispatchEvent(new Event('input',{bubbles:true}));            textarea.dispatchEvent(new Event('change',{bubbles:true}));
-        }    });    function fillCount(repoName,count){        const rows=document.querySelectorAll('tr');        rows.forEach(row=>{            if(new RegExp(`\\b${repoName}\\b`,'i').test(row.innerText)){                const countInput=row.querySelector('input.schedule_range_count');                if(countInput){                    countInput.value=count;                    countInput.dispatchEvent(new Event('input',{bubbles:true}));                    countInput.dispatchEvent(new Event('change',{bubbles:true}));
-                }            }        });    }    Object.keys(repoCount).forEach(repo=>{fillCount(repo,repoCount[repo]);});    function fillLimit(repoName,limit){        const rows=document.querySelectorAll('tr');        rows.forEach(row=>{            if(new RegExp(`\\b${repoName}\\b`,'i').test(row.innerText)){                const limitInput=row.querySelector('input.schedule_range_to');                if(limitInput){                    limitInput.value=limit;                    limitInput.dispatchEvent(new Event('input',{bubbles:true}));                    limitInput.dispatchEvent(new Event('change',{bubbles:true}));
-                }            }        });    }    Object.keys(repoLimit).forEach(repo=>{fillLimit(repo,repoLimit[repo]);});    const incrementCheckbox=document.getElementById('increment');    if(incrementCheckbox&&!incrementCheckbox.checked){        incrementCheckbox.checked=true;        incrementCheckbox.dispatchEvent(new Event('change',{bubbles:true}));
+        }
+    });    const textareas = {        'REPO': document.getElementById('task_list_profiles_488') || document.getElementById('task_list_profiles_196') || document.getElementById('task_list_profiles_200'),        'REPO1': document.getElementById('task_list_profiles_489') || document.getElementById('task_list_profiles_540') || document.getElementById('task_list_profiles_450'),        'REPO2': document.getElementById('task_list_profiles_491') || document.getElementById('task_list_profiles_530'),        'REPO3': document.getElementById('task_list_profiles_492') || document.getElementById('task_list_profiles_559'),
+    };    Object.keys(repoData).forEach(repo => {        const textarea = textareas[repo];        if (textarea) {            textarea.value = repoData[repo].join('\n');            textarea.dispatchEvent(new Event('input',{bubbles:true}));            textarea.dispatchEvent(new Event('change',{bubbles:true}));
+        }
+    });    function fillCount(repoName,count){        const rows=document.querySelectorAll('tr');        rows.forEach(row=>{            if(new RegExp(`\\b${repoName}\\b`,'i').test(row.innerText)){                const countInput=row.querySelector('input.schedule_range_count');                if(countInput){                    countInput.value=count;                    countInput.dispatchEvent(new Event('input',{bubbles:true}));                    countInput.dispatchEvent(new Event('change',{bubbles:true}));
+                }
+            }
+        });
+    }    Object.keys(repoCount).forEach(repo=>{fillCount(repo,repoCount[repo]);});    function fillLimit(repoName,limit){        const rows=document.querySelectorAll('tr');        rows.forEach(row=>{            if(new RegExp(`\\b${repoName}\\b`,'i').test(row.innerText)){                const limitInput=row.querySelector('input.schedule_range_to');                if(limitInput){                    limitInput.value=limit;                    limitInput.dispatchEvent(new Event('input',{bubbles:true}));                    limitInput.dispatchEvent(new Event('change',{bubbles:true}));
+                }
+            }
+        });
+    }    Object.keys(repoLimit).forEach(repo=>{fillLimit(repo,repoLimit[repo]);});    const incrementCheckbox=document.getElementById('increment');    if(incrementCheckbox&&!incrementCheckbox.checked){        incrementCheckbox.checked=true;        incrementCheckbox.dispatchEvent(new Event('change',{bubbles:true}));
     }    if(dateRange){        const parts=dateRange.split(' to ');        const from=document.getElementById('lifetime_from');        const to=document.getElementById('lifetime_to');        if(from){            from.value=parts[0];            from.dispatchEvent(new Event('input',{bubbles:true}));            from.dispatchEvent(new Event('change',{bubbles:true}));
         }        if(to){            to.value=parts[1];            to.dispatchEvent(new Event('input',{bubbles:true}));            to.dispatchEvent(new Event('change',{bubbles:true}));
-        }    }    const filledRepos=Object.keys(repoData).filter(repo=>{        const textarea=textareas[repo];        return textarea&&textarea.value.trim().length>0;
+        }
+    }    const filledRepos=Object.keys(repoData).filter(repo=>{        const textarea=textareas[repo];        return textarea&&textarea.value.trim().length>0;
     });    const taskNameInput=document.getElementById('task_name');    if(taskNameInput&&filledRepos.length>0){        taskNameInput.value=firstLine+': '+filledRepos.join(' + ');        taskNameInput.dispatchEvent(new Event('input',{bubbles:true}));        taskNameInput.dispatchEvent(new Event('change',{bubbles:true}));
     }})();"
     class="bookmarklet"
@@ -394,8 +407,9 @@ button:hover {
 </div>
 
 <div class="input-center">
-  <input type="number" id="stepInput" min="1" value="30" />
-  <input type="time" id="startTime" value="11:00" />
+  <input type="number" id="stepInput" min="1" value="30" title="Time Step (minutes) - The 'Limit'" />
+  <input type="number" id="hourMultiplier" min="1" value="1" title="Count to Hour Multiplier (e.g., 2 means 1 Count = 2 Hours)" />
+  <input type="time" id="startTime" value="11:00" title="Starting Time for the First Task" />
 </div>
 
 <table id="inputTable" contenteditable="true">
@@ -420,6 +434,7 @@ button:hover {
 /* --- Toggle Logic --- */
 const stepInput = document.getElementById('stepInput');
 const startTimeInput = document.getElementById('startTime');
+const hourMultiplierInput = document.getElementById('hourMultiplier'); 
 const ems3Btn = document.getElementById('ems3Btn');
 const ems4Btn = document.getElementById('ems4Btn');
 const ems6Btn = document.getElementById('ems6Btn');
@@ -430,6 +445,7 @@ const ems3NightBtn = document.getElementById('ems3NightBtn');
 const ems6Options = document.getElementById('ems6Options');
 const ems6Option1 = document.getElementById('ems6Option1');
 const ems6Option2 = document.getElementById('ems6Option2');
+const table = document.getElementById('inputTable');
 
 function setToggleState(activeBtn, sliderClass) {
   ems3Btn.classList.remove('active');
@@ -445,7 +461,8 @@ function updateEms3Mode(isDay) {
   ems3DayBtn.classList.toggle('active', isDay);
   ems3NightBtn.classList.toggle('active', !isDay);
   startTimeInput.value = isDay ? "11:00" : "01:00";
-  stepInput.value = isDay ? "30" : "42"; // Change step to 42 for night mode
+  stepInput.value = isDay ? "30" : "42"; 
+  if (hourMultiplierInput) hourMultiplierInput.value = "1";
 }
 
 ems3Btn.addEventListener('click', () => {
@@ -459,6 +476,7 @@ ems4Btn.addEventListener('click', () => {
   setToggleState(ems4Btn, 'ems4');
   stepInput.value = 20;
   startTimeInput.value = "12:05";
+  if (hourMultiplierInput) hourMultiplierInput.value = "1";
   ems3Options.style.display = "none";
   ems6Options.style.display = "none";
 });
@@ -467,6 +485,7 @@ ems6Btn.addEventListener('click', () => {
   setToggleState(ems6Btn, 'ems6');
   stepInput.value = "";
   startTimeInput.value = "11:00";
+  if (hourMultiplierInput) hourMultiplierInput.value = "1";
   ems3Options.style.display = "none";
   ems6Options.style.display = "block";
 });
@@ -494,9 +513,7 @@ ems6Option2.addEventListener('click', () => {
   showNotification("EMS6 → Repo2 + Repo3 → Step = 12");
 });
 
-/* --- Paste Handling --- */
-const table = document.getElementById('inputTable');
-
+/* --- Paste Handling (omitted for brevity, assume correct) --- */
 table.addEventListener('paste', (event) => {
   event.preventDefault();
   const clipboardData = event.clipboardData;
@@ -518,21 +535,18 @@ table.addEventListener('paste', (event) => {
 function pasteHtmlTable(clipboardTable) {
   const tbody = table.querySelector('tbody');
   tbody.innerHTML = '';
-
   clipboardTable.querySelectorAll('tr').forEach(tr => {
     const newRow = document.createElement('tr');
     tr.querySelectorAll('td,th').forEach(cell => {
       const newCell = document.createElement('td');
       newCell.contentEditable = "true";
       newCell.innerHTML = cell.innerHTML;
-
       if (cell.hasAttribute('colspan')) {
         newCell.setAttribute('colspan', cell.getAttribute('colspan'));
       }
       if (cell.hasAttribute('rowspan')) {
         newCell.setAttribute('rowspan', cell.getAttribute('rowspan'));
       }
-
       newRow.appendChild(newCell);
     });
     tbody.appendChild(newRow);
@@ -556,13 +570,12 @@ function pastePlainText(text) {
   });
 }
 
-/* --- Notification --- */
+/* --- Notification (omitted for brevity, assume correct) --- */
 function showNotification(message) {
   const notification = document.createElement('div');
   notification.className = 'notification';
   notification.textContent = message;
   document.body.appendChild(notification);
-
   setTimeout(() => {
     notification.classList.add('show');
     const rect = notification.getBoundingClientRect();
@@ -591,80 +604,138 @@ function showNotification(message) {
       setTimeout(() => confetti.remove(), 2000);
     }
   }, 50);
-
   setTimeout(() => {
     notification.classList.remove('show');
     setTimeout(() => notification.remove(), 400);
   }, 3000);
 }
 
+// Full, corrected parseData function
 function parseData() {
   const stepInput = document.getElementById('stepInput');
   const startTimeInput = document.getElementById('startTime');
+  const hourMultiplierInput = document.getElementById('hourMultiplier'); 
 
   let step = parseInt(stepInput.value, 10);
+  let multiplier = parseInt(hourMultiplierInput.value, 10); 
   if (isNaN(step) || step <= 0) {
     alert('Please enter a valid positive step value!');
     stepInput.focus();
     return;
   }
-
-  const [startHour, startMin] = startTimeInput.value.split(':').map(n => parseInt(n, 10));
-
-  const rows = Array.from(table.querySelectorAll('tbody tr')).map(tr =>
-    Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim())
-  );
-
-  if (rows.length === 0 || rows[0].length === 0 || rows[0].every(c => c === '')) {
-    alert('Please paste your data first!');
+  if (isNaN(multiplier) || multiplier <= 0) { 
+    alert('Please enter a valid positive hour multiplier!');
+    hourMultiplierInput.focus();
     return;
   }
 
-  const lines = rows.map(r => r.join('\t'));
-  const firstLineCols = lines[0].split(/\t+/).filter(Boolean);
+  const [startHour, startMin] = startTimeInput.value.split(':').map(n => parseInt(n, 10));
+
+  const tableRows = Array.from(table.querySelectorAll('tbody tr'));
+  const allRowsData = tableRows.map(tr =>
+    Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim())
+  ).filter(row => row.some(cell => cell !== '')); 
+
+  if (allRowsData.length < 2) {
+    document.getElementById("result").innerHTML = "<p>Please paste data with headers and at least one interval row.</p>";
+    return;
+  }
+
+  const headerCols = allRowsData[0].filter(Boolean);
   const repoNames = [];
-  const repoRanges = [];
-
-  for (let i = 0; i < firstLineCols.length; i += 2) {
-    const rawName = firstLineCols[i].trim();
-    const match = rawName.match(/"(.*?)"/);
-    repoNames.push(match ? match[1] : rawName);
-    repoRanges.push([]);
+  for (let i = 0; i < headerCols.length; i++) {
+      const rawName = headerCols[i].trim();
+      if (/REPO/i.test(rawName)) {
+        const match = rawName.match(/"(.*?)"/);
+        // Correctly extract repo name, assuming the input table has a header format like 'REPO' or 'REPO (R0)'
+        repoNames.push(match ? match[1] : rawName.split(' ')[0]); 
+      }
   }
 
-  for (let i = 2; i < lines.length; i++) {
-    const cols = lines[i].split(/\t+/).filter(Boolean);
-    for (let r = 0; r < repoNames.length; r++) {
-      const start = parseInt(cols[r*3], 10);
-      const end = parseInt(cols[r*3 + 1], 10);
-      if (!isNaN(start) && !isNaN(end)) {
-        repoRanges[r].push({ start, end });
+  // --- Phase 1: Group Intervals by Repo, Split only on start=1 ---
+  const allTaskBlocks = [];
+  const repoIntervalsMap = new Map(); // Map to store current, unfinalized block for each repo
+
+  // Start from the first data row (index 2 for input table is the 3rd row)
+  for (let rowIndex = 2; rowIndex < allRowsData.length; rowIndex++) {
+      const cols = allRowsData[rowIndex];
+      let colIndex = 0;
+
+      for (let r = 0; r < repoNames.length; r++) {
+          const repo = repoNames[r];
+          const startCol = colIndex;
+          const endCol = colIndex + 1; 
+
+          const start = parseInt(cols[startCol], 10);
+          const end = parseInt(cols[endCol], 10);
+
+          if (!isNaN(start) && !isNaN(end)) {
+              // Calculate count based on the current interval
+              const count = Math.ceil((end - start + 1) / step); 
+              let currentBlock = repoIntervalsMap.get(repo);
+              
+              // SPLIT CONDITION: If start=1 OR if there is no current block
+              const needsSplit = currentBlock === undefined || start === 1;
+
+              if (needsSplit) {
+                  if (currentBlock) {
+                      allTaskBlocks.push(currentBlock);
+                  }
+                  
+                  // Start new block
+                  currentBlock = {
+                      repo: repo,
+                      minStart: start,
+                      maxEnd: end,
+                      count: count,
+                      limit: step,
+                      firstRow: rowIndex, 
+                      lastRow: rowIndex
+                  };
+                  repoIntervalsMap.set(repo, currentBlock);
+              } else {
+                  // CONTINUE CONDITION: Merge sequential intervals (if next interval follows the end of the current block)
+                  const lastEnd = currentBlock.maxEnd;
+                  // If the next start follows immediately after the current end, merge it
+                  if (start === lastEnd + 1) {
+                    currentBlock.maxEnd = end;
+                    currentBlock.count += count; 
+                    currentBlock.lastRow = rowIndex;
+                  } else {
+                    // Force a split if the interval is not contiguous, even if start != 1
+                    allTaskBlocks.push(currentBlock);
+                    
+                    // Start new block
+                    currentBlock = {
+                        repo: repo,
+                        minStart: start,
+                        maxEnd: end,
+                        count: count,
+                        limit: step,
+                        firstRow: rowIndex, 
+                        lastRow: rowIndex
+                    };
+                    repoIntervalsMap.set(repo, currentBlock);
+                  }
+              }
+          }
+          colIndex += 3; 
       }
-    }
   }
 
-  function mergeAndSplit(ranges) {
-    let groups = [];
-    let currentGroup = [];
-    ranges.forEach(({start, end}) => {
-      if (start === 1 && currentGroup.length) {
-        groups.push(currentGroup);
-        currentGroup = [];
-      }
-      if (currentGroup.length === 0) {
-        currentGroup.push({start, end});
-      } else {
-        const last = currentGroup[currentGroup.length - 1];
-        if (start <= last.end + 1) {
-          last.end = Math.max(last.end, end);
-        } else {
-          currentGroup.push({start, end});
-        }
-      }
-    });
-    if (currentGroup.length) groups.push(currentGroup);
-    return groups;
-  }
+  // Finalize all remaining blocks after the loop
+  repoIntervalsMap.forEach(block => {
+      allTaskBlocks.push(block);
+  });
+  
+  // Sort blocks to ensure sequential order is maintained across repos
+  allTaskBlocks.sort((a, b) => {
+      if (a.firstRow !== b.firstRow) return a.firstRow - b.firstRow;
+      return a.repo.localeCompare(b.repo);
+  });
+
+
+  // --- Phase 2: Sequential Task Stream Scheduling ---
 
   function formatDateTime(date) {
     const y = date.getFullYear();
@@ -676,59 +747,88 @@ function parseData() {
     return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
   }
 
+  // Set the base date and initial global start time
   const now = new Date();
   const baseDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-  // Add this new section for EMS3 night mode
   const isEms3Night = document.getElementById('ems3NightBtn').classList.contains('active');
   if (isEms3Night) {
-    baseDate.setDate(baseDate.getDate() + 1);
+    baseDate.setDate(baseDate.getDate() + 1); 
   }
-  // End of new section
+  const globalStartTime = new Date(baseDate);
+  globalStartTime.setHours(startHour, startMin, 0, 0);
 
-  const repoGroups = [];
 
-  repoNames.forEach((repo, idx) => {
-    const groups = mergeAndSplit(repoRanges[idx]);
-    let hour = startHour;
-    let minute = startMin;
+  // Tracker for when each REPO stream finishes (to enforce sequential splits)
+  const repoFinishTime = new Map();
+  // Store all scheduled blocks, including start/end times
+  const scheduledBlocks = [];
 
-    repoGroups[idx] = groups.map(group => {
-      const minStart = Math.min(...group.map(r => r.start));
-      const maxEnd = Math.max(...group.map(r => r.end));
-      let countSum = 0;
-      group.forEach(r => {
-        countSum += Math.ceil((r.end - r.start + 1) / step);
-      });
-
-      const startTime = new Date(baseDate);
-      startTime.setHours(hour, minute, 0, 0);
-
-      const endTime = new Date(startTime);
-      endTime.setHours(endTime.getHours() + countSum);
-
-      hour += countSum;
-
-      return {ranges: group, count: countSum, minStart, maxEnd, startTime, endTime};
-    });
+  // Initialize all repo streams to the global start time
+  repoNames.forEach(repo => {
+      repoFinishTime.set(repo, globalStartTime);
   });
 
+  // Schedule each block sequentially within its repo stream
+  allTaskBlocks.forEach(block => {
+      const repo = block.repo;
+      
+      // The slot starts either at the global start time or when the repo's previous block finished
+      const slotStartTime = new Date(repoFinishTime.get(repo));
+
+      // Calculate total duration in milliseconds
+      const totalDurationHours = block.count * multiplier;
+      const durationMs = totalDurationHours * 60 * 60 * 1000;
+      
+      const slotEndTime = new Date(slotStartTime.getTime() + durationMs);
+      
+      // Store the result
+      scheduledBlocks.push({
+          repo: repo,
+          minStart: block.minStart,
+          maxEnd: block.maxEnd,
+          count: block.count,
+          limit: block.limit,
+          startTime: formatDateTime(slotStartTime),
+          endTime: formatDateTime(slotEndTime)
+      });
+      
+      // Update the repo's finish time for the next sequential task
+      repoFinishTime.set(repo, slotEndTime);
+  });
+  
+  // Sort the final blocks by their start time for display order
+  scheduledBlocks.sort((a, b) => {
+      const timeA = new Date(a.startTime).getTime();
+      const timeB = new Date(b.startTime).getTime();
+      // Primary sort by start time, secondary sort by repo name for stability
+      if (timeA !== timeB) return timeA - timeB;
+      return a.repo.localeCompare(b.repo);
+  });
+
+
+  // --- Phase 3: Grouping/Combining ---
   const combinedMap = new Map();
 
-  repoGroups.forEach((groups, repoIdx) => {
-    groups.forEach(group => {
-      const key = formatDateTime(group.startTime) + "|" + formatDateTime(group.endTime);
-      if (!combinedMap.has(key)) combinedMap.set(key, []);
-      combinedMap.get(key).push({
-        repo: repoNames[repoIdx],
-        minStart: group.minStart,
-        maxEnd: group.maxEnd,
-        count: group.count
-      });
+  scheduledBlocks.forEach(block => {
+    // Key combines start time, end time, AND count
+    const key = block.startTime + "|" + block.endTime + "|" + block.count;
+    
+    if (!combinedMap.has(key)) combinedMap.set(key, {
+        repos: [],
+        startTime: block.startTime,
+        endTime: block.endTime,
+        count: block.count,
+        limit: block.limit
+    });
+    combinedMap.get(key).repos.push({
+      repo: block.repo,
+      minStart: block.minStart,
+      maxEnd: block.maxEnd
     });
   });
 
-  // Determine active EMS mode
+  // --- Phase 4: Generate Output HTML ---
+  let html = "";
   let activeEms = 'EMS3';
   if (ems4Btn.classList.contains('active')) {
     activeEms = 'EMS4';
@@ -736,32 +836,38 @@ function parseData() {
     activeEms = 'EMS6';
   }
 
-  let html = "";
-  combinedMap.forEach((repos, key) => {
-    const [startTime, endTime] = key.split("|");
-    html += `<div class="group">`;
-
-    repos.forEach((r, i) => {
+  let index = 0;
+  combinedMap.forEach(group => {
+    
+    // HTML Output
+    html += `<div class="group" style="animation-delay: ${index * 0.1}s;">`;
+    index++;
+    
+    // List all repositories and their ranges in this consolidated group
+    group.repos.forEach((r, i) => {
       html += `<strong>${r.repo}</strong>: ${r.minStart} to ${r.maxEnd}`;
-      if (i < repos.length -1) html += " &nbsp;&nbsp;&nbsp; ";
+      if (i < group.repos.length -1) html += " &nbsp;&nbsp;&nbsp; ";
     });
 
     html += `<br>`;
-    repos.forEach(r => {
-      html += `Count: ${r.count}<br>`;
-      html += `Limit: ${step}<br>`;
-    });
-    html += `${startTime} to ${endTime} &nbsp;&nbsp;`;
+    // Print the shared Count and Limit (step) once for the group
+    html += `Count: ${group.count}<br>`;
+    html += `Limit: ${group.limit}<br>`;
+    
+    // Time slot
+    html += `${group.startTime} to ${group.endTime} &nbsp;&nbsp;`;
 
+    // Construct Copy Expanded text 
     let copyText = `${activeEms}\n`;
-    repos.forEach(r => {
+    group.repos.forEach(r => {
       copyText += `${r.repo}\n${r.minStart} to ${r.maxEnd}\n` +
-                  `Count ${r.count}\nLimit ${step}\n`;
+                  `Count ${group.count}\nLimit ${group.limit}\n`;
     });
-    copyText += `${startTime} to ${endTime}`;
+    copyText += `${group.startTime} to ${group.endTime}`;
 
     const copyId = "copy_" + Math.random().toString(36).substr(2,9);
     html += `<button class="copyBtn" data-copyid="${copyId}">Copy Expanded</button>`;
+    html += `</div>`;
 
     setTimeout(() => {
       const btn = document.querySelector(`button[data-copyid='${copyId}']`);
@@ -773,10 +879,13 @@ function parseData() {
         };
       }
     }, 10);
-
-    html += `</div>`;
   });
 
+
+  if (scheduledBlocks.length === 0) {
+      html = "<p>No valid data found to process.</p>";
+  }
+  
   document.getElementById("result").innerHTML = html;
 }
 </script>
