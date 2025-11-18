@@ -64,6 +64,39 @@ h2 {
   letter-spacing: -0.5px;
 }
 
+/* --- New Side-by-Side Layout --- */
+.side-by-side-container {
+  display: flex;
+  flex-direction: row; 
+  gap: 20px;
+  width: 95%; /* Use more screen width */
+  max-width: 1400px; /* Limit maximum width */
+  margin-top: 20px;
+}
+
+.input-panel {
+  flex: 1; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.5); 
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  min-width: 400px; 
+}
+
+/* Override existing #result styles for side-by-side layout */
+#result {
+  flex: 1;
+  width: auto; 
+  max-width: none; 
+  margin: 0; 
+  padding: 20px; /* Restore padding that was in original #result */
+}
+/* --- End Side-by-Side Layout --- */
+
+
 /* Toggle Switch */
 .toggle-wrapper {
   display: flex;
@@ -188,8 +221,8 @@ table {
   border-collapse: collapse;
   background: rgba(255,255,255,0.8);
   backdrop-filter: blur(6px);
-  width: 90%;
-  max-width: 820px;
+  width: 95%; /* Adjusted for side-by-side */
+  max-width: 100%; 
   margin: 0 auto 25px;
   border-radius: 16px;
   overflow: hidden;
@@ -202,8 +235,8 @@ th, td {
   height: 15px;
   text-align: center;
   vertical-align: middle;
-  font-size: 0.7rem;
-  padding: 5px 7px;
+  font-size: 0.65rem; /* Reduced font size for tighter fit */
+  padding: 3px 5px; /* Reduced padding for tighter fit */
 }
 
 td[contenteditable="true"] {
@@ -249,6 +282,7 @@ button {
   cursor: pointer;
   box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
   transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  margin-bottom: 10px; /* Added margin for Parse button */
 }
 
 button:hover {
@@ -269,14 +303,12 @@ button:hover {
 }
 
 /* Result container */
+/* Re-applying some styles to #result as it is no longer auto-centered by body */
 #result {
-  width: 90%;
-  max-width: 820px;
   background: rgba(255,255,255,0.75);
   border: 1px solid rgba(229, 231, 235, 0.8);
   border-radius: 16px;
   padding: 20px;
-  margin: 20px auto;
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
   font-family: 'Courier New', monospace;
   font-size: 0.95rem;
@@ -348,6 +380,30 @@ button:hover {
 .notification.show {
   bottom: 24px;
 }
+
+/* --- Media Query for Mobile/Small Screens --- */
+@media (max-width: 1000px) {
+    .side-by-side-container {
+        flex-direction: column; /* Stack panels vertically */
+        width: 90%;
+        max-width: 820px; 
+    }
+    .input-panel {
+        min-width: auto;
+        padding: 10px;
+    }
+    table {
+        width: 100%;
+        font-size: 0.7rem; /* Restore slightly larger font on stacked layout */
+    }
+    th, td {
+        padding: 5px 7px;
+    }
+    #result {
+        width: 100%;
+        max-width: 100%; 
+    }
+}
 </style>
 </head>
 <body>
@@ -387,48 +443,52 @@ button:hover {
 
 <h2>Paste your Excel/Google Sheets data</h2>
 
-<div class="toggle-wrapper">
-  <div class="toggle-switch">
-    <span id="ems3Btn" class="toggle-btn active">EMS3</span>
-    <span id="ems4Btn" class="toggle-btn">EMS4</span>
-    <span id="ems6Btn" class="toggle-btn">EMS6</span>
-    <div class="toggle-slider ems3"></div>
-  </div>
+<div class="side-by-side-container">
+    <div class="input-panel">
+        <div class="toggle-wrapper">
+          <div class="toggle-switch">
+            <span id="ems3Btn" class="toggle-btn active">EMS3</span>
+            <span id="ems4Btn" class="toggle-btn">EMS4</span>
+            <span id="ems6Btn" class="toggle-btn">EMS6</span>
+            <div class="toggle-slider ems3"></div>
+          </div>
+        </div>
+
+        <div id="ems3Options">
+          <span id="ems3DayBtn" class="active">Day</span>
+          <span id="ems3NightBtn">Night</span>
+        </div>
+
+        <div id="ems6Options" style="display:none; margin:15px 0; text-align:center;">
+          <button id="ems6Option1">Repo + Repo1</button>
+          <button id="ems6Option2">Repo2 + Repo3</button>
+        </div>
+
+        <div class="input-center">
+          <input type="number" id="stepInput" min="1" value="30" title="Time Step (minutes) - The 'Limit'" />
+          <input type="number" id="hourMultiplier" min="1" value="1" title="Count to Hour Multiplier (e.g., 2 means 1 Count = 2 Hours)" />
+          <input type="time" id="startTime" value="11:00" title="Starting Time for the First Task" />
+        </div>
+
+        <table id="inputTable" contenteditable="true">
+          <tbody>
+            <tr><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td></tr>
+          </tbody>
+        </table>
+
+        <button id="parseButton">Parse Data</button>
+    </div>
+    
+    <div id="result"></div>
 </div>
-
-<div id="ems3Options">
-  <span id="ems3DayBtn" class="active">Day</span>
-  <span id="ems3NightBtn">Night</span>
-</div>
-
-<div id="ems6Options" style="display:none; margin:15px 0; text-align:center;">
-  <button id="ems6Option1">Repo + Repo1</button>
-  <button id="ems6Option2">Repo2 + Repo3</button>
-</div>
-
-<div class="input-center">
-  <input type="number" id="stepInput" min="1" value="30" title="Time Step (minutes) - The 'Limit'" />
-  <input type="number" id="hourMultiplier" min="1" value="1" title="Count to Hour Multiplier (e.g., 2 means 1 Count = 2 Hours)" />
-  <input type="time" id="startTime" value="11:00" title="Starting Time for the First Task" />
-</div>
-
-<table id="inputTable" contenteditable="true">
-  <tbody>
-    <tr><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td></tr>
-  </tbody>
-</table>
-
-<button onclick="parseData()">Parse Data</button>
-
-<div id="result"></div>
 
 <script>
 /* --- Toggle Logic --- */
@@ -446,6 +506,7 @@ const ems6Options = document.getElementById('ems6Options');
 const ems6Option1 = document.getElementById('ems6Option1');
 const ems6Option2 = document.getElementById('ems6Option2');
 const table = document.getElementById('inputTable');
+const parseButton = document.getElementById('parseButton');
 
 function setToggleState(activeBtn, sliderClass) {
   ems3Btn.classList.remove('active');
@@ -498,7 +559,7 @@ ems3NightBtn.addEventListener('click', () => {
   updateEms3Mode(false);
 });
 
-// Initial state
+// Initial state (will be called again in DOMContentLoaded)
 updateEms3Mode(true);
 
 
@@ -526,10 +587,12 @@ table.addEventListener('paste', (event) => {
     const clipboardTable = doc.querySelector('table');
     if (clipboardTable) {
       pasteHtmlTable(clipboardTable);
+      triggerParse(); // Trigger parse after successful HTML paste
       return;
     }
   }
   pastePlainText(plainText);
+  triggerParse(); // Trigger parse after successful plain text paste
 });
 
 function pasteHtmlTable(clipboardTable) {
@@ -610,6 +673,36 @@ function showNotification(message) {
   }, 3000);
 }
 
+/* --- Real-Time Update Logic --- */
+
+// Debounce function to limit calls during rapid input
+function triggerParse() {
+    clearTimeout(window.parseTimer);
+    window.parseTimer = setTimeout(parseData, 300); 
+}
+
+function attachEventListeners() {
+    // 1. Input fields
+    stepInput.addEventListener('input', triggerParse);
+    startTimeInput.addEventListener('input', triggerParse);
+    if (hourMultiplierInput) {
+        hourMultiplierInput.addEventListener('input', triggerParse);
+    }
+    
+    // 2. Table input (real-time changes in editable cells)
+    table.addEventListener('input', triggerParse);
+    
+    // 3. Toggles and Buttons
+    ems3Btn.addEventListener('click', triggerParse);
+    ems4Btn.addEventListener('click', triggerParse);
+    ems6Btn.addEventListener('click', triggerParse);
+    ems3DayBtn.addEventListener('click', triggerParse);
+    ems3NightBtn.addEventListener('click', triggerParse);
+    ems6Option1.addEventListener('click', triggerParse);
+    ems6Option2.addEventListener('click', triggerParse);
+    parseButton.addEventListener('click', parseData); // Manual button click fallback/option
+}
+
 // Full, corrected parseData function
 function parseData() {
   const stepInput = document.getElementById('stepInput');
@@ -617,15 +710,14 @@ function parseData() {
   const hourMultiplierInput = document.getElementById('hourMultiplier'); 
 
   let step = parseInt(stepInput.value, 10);
+  // Read multiplier from the dedicated input
   let multiplier = parseInt(hourMultiplierInput.value, 10); 
   if (isNaN(step) || step <= 0) {
-    alert('Please enter a valid positive step value!');
-    stepInput.focus();
+    document.getElementById("result").innerHTML = "<p>Please enter a valid positive step value (Limit).</p>";
     return;
   }
   if (isNaN(multiplier) || multiplier <= 0) { 
-    alert('Please enter a valid positive hour multiplier!');
-    hourMultiplierInput.focus();
+    document.getElementById("result").innerHTML = "<p>Please enter a valid positive hour multiplier (Count to Hour Multiplier).</p>";
     return;
   }
 
@@ -643,21 +735,26 @@ function parseData() {
 
   const headerCols = allRowsData[0].filter(Boolean);
   const repoNames = [];
+  // Assuming the headers are in the format "REPO" or "REPO (R0)"
   for (let i = 0; i < headerCols.length; i++) {
       const rawName = headerCols[i].trim();
       if (/REPO/i.test(rawName)) {
         const match = rawName.match(/"(.*?)"/);
-        // Correctly extract repo name, assuming the input table has a header format like 'REPO' or 'REPO (R0)'
         repoNames.push(match ? match[1] : rawName.split(' ')[0]); 
       }
   }
 
+  if (repoNames.length === 0) {
+    document.getElementById("result").innerHTML = "<p>Could not detect repository names in the header row.</p>";
+    return;
+  }
+
   // --- Phase 1: Group Intervals by Repo, Split only on start=1 ---
   const allTaskBlocks = [];
-  const repoIntervalsMap = new Map(); // Map to store current, unfinalized block for each repo
+  const repoIntervalsMap = new Map(); 
 
-  // Start from the first data row (index 2 for input table is the 3rd row)
-  for (let rowIndex = 2; rowIndex < allRowsData.length; rowIndex++) {
+  // Start from the first data row (index 1 for data rows, index 0 is header)
+  for (let rowIndex = 1; rowIndex < allRowsData.length; rowIndex++) {
       const cols = allRowsData[rowIndex];
       let colIndex = 0;
 
@@ -694,7 +791,7 @@ function parseData() {
                   };
                   repoIntervalsMap.set(repo, currentBlock);
               } else {
-                  // CONTINUE CONDITION: Merge sequential intervals (if next interval follows the end of the current block)
+                  // CONTINUE CONDITION: Merge sequential intervals
                   const lastEnd = currentBlock.maxEnd;
                   // If the next start follows immediately after the current end, merge it
                   if (start === lastEnd + 1) {
@@ -752,6 +849,7 @@ function parseData() {
   const baseDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const isEms3Night = document.getElementById('ems3NightBtn').classList.contains('active');
   if (isEms3Night) {
+    // If it's night mode, start on the next calendar day
     baseDate.setDate(baseDate.getDate() + 1); 
   }
   const globalStartTime = new Date(baseDate);
@@ -775,7 +873,8 @@ function parseData() {
       // The slot starts either at the global start time or when the repo's previous block finished
       const slotStartTime = new Date(repoFinishTime.get(repo));
 
-      // Calculate total duration in milliseconds
+      // Calculate total duration in milliseconds using the multiplier
+      // Duration (Hours) = Calculated Count * Multiplier
       const totalDurationHours = block.count * multiplier;
       const durationMs = totalDurationHours * 60 * 60 * 1000;
       
@@ -796,17 +895,10 @@ function parseData() {
       repoFinishTime.set(repo, slotEndTime);
   });
   
-  // Sort the final blocks by their start time for display order
-  scheduledBlocks.sort((a, b) => {
-      const timeA = new Date(a.startTime).getTime();
-      const timeB = new Date(b.startTime).getTime();
-      // Primary sort by start time, secondary sort by repo name for stability
-      if (timeA !== timeB) return timeA - timeB;
-      return a.repo.localeCompare(b.repo);
-  });
+  // No need to sort here, the final combined array will be sorted below.
 
 
-  // --- Phase 3: Grouping/Combining ---
+  // --- Phase 3: Grouping/Combining (Consolidates tasks with identical time/count) ---
   const combinedMap = new Map();
 
   scheduledBlocks.forEach(block => {
@@ -827,7 +919,7 @@ function parseData() {
     });
   });
 
-  // --- Phase 4: Generate Output HTML ---
+  // --- Phase 4: Generate Output HTML (Sorted by Repo Name) ---
   let html = "";
   let activeEms = 'EMS3';
   if (ems4Btn.classList.contains('active')) {
@@ -835,10 +927,30 @@ function parseData() {
   } else if (ems6Btn.classList.contains('active')) {
     activeEms = 'EMS6';
   }
+  
+  // 1. Convert Map to Array and ensure Repos within each group are sorted alphabetically
+  const groupsArray = Array.from(combinedMap.values()).map(group => {
+      group.repos.sort((a, b) => a.repo.localeCompare(b.repo));
+      return group;
+  });
+
+  // 2. Sort the array of groups by Repo Name (Primary) and Start Time (Secondary)
+  groupsArray.sort((a, b) => {
+      // Primary sort: by the first repo name in the group (which is now guaranteed to be the earliest alphabetically)
+      const repoA = a.repos[0].repo;
+      const repoB = b.repos[0].repo;
+      if (repoA !== repoB) {
+          return repoA.localeCompare(repoB);
+      }
+      // Secondary sort: by start time
+      const timeA = new Date(a.startTime).getTime();
+      const timeB = new Date(b.startTime).getTime();
+      return timeA - timeB;
+  });
+
 
   let index = 0;
-  combinedMap.forEach(group => {
-    
+  groupsArray.forEach(group => {
     // HTML Output
     html += `<div class="group" style="animation-delay: ${index * 0.1}s;">`;
     index++;
@@ -888,6 +1000,14 @@ function parseData() {
   
   document.getElementById("result").innerHTML = html;
 }
+
+// Initial attachment and call on page load
+document.addEventListener('DOMContentLoaded', () => {
+    updateEms3Mode(ems3DayBtn.classList.contains('active'));
+    attachEventListeners();
+    // Run an initial parse to show a result immediately if inputs have default values
+    parseData(); 
+});
 </script>
 
 </body>
