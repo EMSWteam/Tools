@@ -35,7 +35,7 @@ function mapHourToRow(hour) {
 
 // Map row to listNbr (start from 15)
 function mapRowToListNbr(row) {
-    return row + 14;
+    return row + 0;
 }
 
 // Return formatted date string based on hour shift
